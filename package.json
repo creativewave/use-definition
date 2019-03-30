@@ -1,0 +1,72 @@
+{
+  "name": "@cdoublev/use-definition",
+  "description": "React hook to transition between a collection of SVG <path> definitions",
+  "author": "Guillaume Lebas",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "react-hooks"
+  ],
+  "version": "0.1.0",
+  "homepage": "https://github.com/creativewave/use-definition",
+  "bugs": "https://github.com/creativewave/use-definition/issues",
+  "repository": "github:creativewave/use-definition",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/es/index.js",
+  "unpkg": "dist/umd/use-definition.min.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "npm run build:cjs && npm run build:es && npm run build:umd && npm run build:umd:min",
+    "build:cjs": "BABEL_ENV=cjs babel src -d dist/cjs",
+    "build:es": "BABEL_ENV=esmodules babel src -d dist/es",
+    "build:umd": "webpack -d src/index.js -o dist/umd/use-definition.js",
+    "build:umd:min": "webpack -p src/index.js -o dist/umd/use-definition.min.js",
+    "lint": "eslint src test",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "test": "mocha",
+    "test:report": "mocha -R mocha-junit-reporter --reporter-options mochaFile=test/results.xml",
+    "test:watch": "mocha -w -b -R min"
+  },
+  "dependencies": {
+    "folktale": "^2.3.2",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/polyfill": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.4.0",
+    "babel-loader": "^8.0.4",
+    "browserslist": "^4.5.5",
+    "eslint": "^5.14.1",
+    "eslint-plugin-compat": "^3.1.1",
+    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-react-hooks": "^1.6.0",
+    "mocha": "^6.1.4",
+    "mocha-clean": "^1.0.0",
+    "mocha-junit-reporter": "^1.22.0",
+    "react": "^16.8.6",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
+  },
+  "peerDependencies": {
+    "react": "^16.7.0-alpha.0"
+  },
+  "browserslist": {
+    "production": [
+      "last 2 versions",
+      "not ie <= 11"
+    ],
+    "development": [
+      "last 1 Chrome version"
+    ]
+  }
+}

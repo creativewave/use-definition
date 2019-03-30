@@ -1,0 +1,7 @@
+/.circleci/
+/src/
+/test/
+.babelrc.js
+.eslintrc.js
+.mocharc.js
+webpack.config.js
