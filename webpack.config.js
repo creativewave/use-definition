@@ -12,7 +12,7 @@ module.exports = env => ({
     mode: env,
     module: { rules: [{ exclude: /node_modules/, test: /\.jsx?$/, use: 'babel-loader' }] },
     output: {
-        library: 'UsePathDefinition',
+        library: 'UseDefinition',
         libraryTarget: 'umd'
     },
 })

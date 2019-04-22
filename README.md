@@ -3,8 +3,8 @@
 # use-definition
 
 1. [About](#about)
-2. [Example](#example)
-3. [Installation](#installation)
+2. [Installation](#installation)
+3. [Example](#example)
 4. [API](#API)
 
 ## About
@@ -26,18 +26,26 @@ Features:
 
 This package has been created to overcome the limitations of the existing SVG animation libraries for this specific need. It's an alternative to [GreenSock morphSVG plugin](https://greensock.com/morphSVG), which is not free and "React plug and play ready", but has some extra features, probably a better support for old browsers, and higher performances.
 
-This package doesn't include any external dependencies like [SVGO](https://github.com/svg/svgo) to parse or normalize definitions, in order to avoid extra iterations on each definition and optimize performances.
+This package has no external dependency like [SVGO](https://github.com/svg/svgo) to parse or normalize definitions, in order to avoid extra iterations on each definition and optimize performances.
+
+## Installation
+
+```shell
+  npm i @cdoublev/use-definition
+```
+
+**Note on browsers support:** this package doesn't include a polyfill of `requestAnimationFrame`, which is required for IE < 10. You should [include it](https://gist.github.com/paulirish/1579671) [yourself](https://hackernoon.com/polyfills-everything-you-ever-wanted-to-know-or-maybe-a-bit-less-7c8de164e423).
 
 ## Example
 
 ```js
-    import usePathDefinition from '@cdoublev/use-definition'
+    import useDefinition from '@cdoublev/use-definition'
     import React from 'react'
     import ReactDOM from 'react-dom'
 
     const MorphingPath = ({ definitions }) => {
 
-        const [definition, animateTo] = usePathDefinition({ definitions })
+        const [definition, animateTo] = useDefinition({ definitions })
         const handleClick = () => {
             const { run, sequence } = animateTo(currentIndex => currentIndex === 1 ? 0 : 1)
             run(sequence)
@@ -60,35 +68,17 @@ This package doesn't include any external dependencies like [SVGO](https://githu
     ReactDOM.render(<MorphingPath definitions={definitions} />, document.getElementById('app'))
 ```
 
-## Installation
-
-**Note on browsers support:** this package doesn't include a polyfill of `requestAnimationFrame`, which is required for IE < 10. You should [include it](https://gist.github.com/paulirish/1579671) [yourself](https://hackernoon.com/polyfills-everything-you-ever-wanted-to-know-or-maybe-a-bit-less-7c8de164e423).
-
-**Via npm**
-
-```shell
-  npm i @cdoublev/use-definition
-```
-
-**As an external dependency (via unpkg)**
-
-```html
-    <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@cdoublev/use-definition"></script>
-```
-
 ## API
 
 ```js
-    import usePathDefinition, { timing } from '@cdoublev/use-definition`
+    import useDefinition, { timing } from '@cdoublev/use-definition`
 ```
 
-### `usePathDefinition`
+### `useDefinition`
 
-`usePathDefinition` is the default export of this package. It's a React hook which has the following signature:
+`useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`usePathDefinition :: { definitions: [Definition], options?: Options, startIndex?: Number } -> [Definition, Function]`
+`useDefinition :: { definitions: [Definition], options?: Options, startIndex?: Number } -> [Definition, Function]`
 
 #### Arguments
 

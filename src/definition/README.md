@@ -1,9 +1,9 @@
 
-1. [Implementation of `usePathDefinition`](#implementation-of-use[Path]definition)
+1. [Implementation of `useDefinition`](#implementation-of-useDefinition)
 2. [Types and terminology](#types-and-terminology)
 3. [Transforming a point to a cubic command point](#transforming-a-point-to-a-cubic-command-point)
 
-# Implementation of `use[Path]Definition`
+# Implementation of `useDefinition`
 
 **Why using `useState` to *save* a `Definition` then *write* it as a `d`efinition attribute of an SVG `<path>`, instead of *writing* it directly using a `ref`erence of this native element and its `setAttributeNS()` imperative method?**
 
