@@ -86,63 +86,66 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
 `definitions` should be assigned with a collection of `d`efinition attributes of multiple SVG `<path>`s.
 
-All commands types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`, `z` – either using relative or absolute values. The only rule is that each `<path>` should not include a moving command (`m` or `M`) that is not the first command of the definition.
+All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`, `z` – either using relative or absolute values. The only rule is that each `<path>` should not include a moving command (`m` or `M`) that is not the first command of the definition.
 
 ##### `options` (optional)
 
 Default: `{ minDelay: 0, maxDelay: 1000, minDuration: 3000, maxDuration: 5000 }`
 
-`options` can be set to configure the animation for a single point:
+`options` can be set to configure the animation of a point:
 
 - `minDelay`, `maxDelay`: minimum and maximum delay in ms before starting the animation
 - `minDuration`, `maxDuration`: minimum and maximum duration in ms of an animation
 
-Each point will receive random values between the given minimum and maximum of the corresponding option, and will apply them to its parameters. The points which have the same parameters values will also have the same option values applied.
+Each point will receive random values between the given minimum and maximum of the corresponding option, and will apply them to its parameters. Points with the same parameters values will also have the same option values applied.
 
 ##### `startIndex` (optional)
 
 Default: `0`
 
-`startIndex` can be used to set an arbitrary index for the first definition to render.
+`startIndex` can be used to configure the first definition to render using its index in the giving collection of `definitions`.
 
 #### Return values
 
 ##### `definition`
 
-The `String` returned by `usePathDefinition` can be named `definition` and should be used as the `d`efinition attribute value of the SVG `<path>` to render.
+The `String` returned by `useDefinition` can be named `definition` and should be used as the `d`efinition attribute value of the SVG `<path>` to render.
 
 It will be automatically updated while transitionning to another definition.
 
 ##### `animateTo`
 
-The `Function` returned by `usePathDefinition` can be named `animateTo` and has the following signature:
+The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
 `animateTo :: (NextIndex, TimingFunction?) -> { sequence: Task, run: Identity }`
+
 `NextIndex :: Number | (Number -> Number)`
+
 `TimingFunction :: String | ((Number, [Point, Point]?) -> Number)`
+
 `Identity :: a -> a`
 
-**Expected arguments**
+##### Expected arguments:
 
 `animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'ease-out-cubic'`.
 
 `NextIndex` should be either an index `Number` of the next definition to transition to, or a function receiving the current index and returning the next index.
 
-`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called at each frame for each parameters in the definition. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a parameter from the initial definition and its corresponding parameter from the definition to transition to. The behavior of this timing function will vary depending on its parameters:
+`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a parameter from the initial definition and its corresponding parameter from the definition to transition to. The behavior of this timing function will vary depending on its parameters:
 
 - if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
-- otherwise, it should return the new parameters directly
+- otherwise, it should return the new parameter directly
 
-For example, a linear timing function that receive parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }`, should return `0.75` when time is `0.75` when using only the time as argument, or `{ x: 75, y: 75 }` when using the second argument (parameters from initial and next definitions).
+For example, a linear timing function that receive parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }`, should return `0.75` when time is `0.75` when using time as its sole argument, or `{ x: 75, y: 75 }` when using the second argument.
 
-**Return value**
+##### Return value:
 
-`animateTo` will return an object with:
+`animateTo` will return an object with the following properties:
 
-- a `sequence` property assigned to a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html), which can be used to chain consecutive(s) animation(s)
-- a `run` property assigned to a function to run the animation.
+- `sequence`: a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) to chain consecutive(s) animation(s)
+- `run`: a function to run the sequence of animation(s)
 
-The latter is a dirty trick to automatically cancel the animation if the component has its definition animated when it is either updated or unmounted.
+The latter is a dirty trick to automatically cancel the animation when the component has its definition animated while it is either updated or unmounted.
 
 **Using Folktale Task's interface**
 
@@ -179,7 +182,7 @@ Running a parrallel computation (not implemented yet):
 
 **Visualisations:** [CodePen](https://codepen.io/creative-wave/pen/vMrXJa).
 
-Medium to heavy motion design projects usually involve custom timing functions. This collection is only meant for demonstration purpose, as replacing CSS with JavaScript to transition between two paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
+Medium to heavy motion design projects usually involve custom timing functions. This collection is only meant for demonstration purpose. Replacing CSS with JavaScript to transition between two paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
 
 ## TODO
 
