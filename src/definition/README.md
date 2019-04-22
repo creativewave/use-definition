@@ -5,15 +5,15 @@
 
 # Implementation of `useDefinition`
 
-**Why using `useState` to *save* a `Definition` then *write* it as a `d`efinition attribute of an SVG `<path>`, instead of *writing* it directly using a `ref`erence of this native element and its `setAttributeNS()` imperative method?**
+**Why using `useState` to *save* a definition then *write* it as a definition attribute of an SVG `<path>`, instead of using `useRef` and *writing* it directly with `setAttributeNS()`?**
 
 `useEffect`, `useState` and `requestAnimationFrame` make it cheap and easy to render an animation without blocking rendering or user interactions. Using `Definition` from state also allow this:
 
 ```jsx
-    const higherOrderDefinition = ({ definition }) => `M0 0, H 100, V 100, H 0, z${definition}`
+    const higherOrderDefinition = ({ definition }) => `M0 0, H 100, V 100, H 0, z ${definition}`
 ```
 
-While adding a frame (this is what the code above does) to a path is not very usefull, some use cases involving SVG `<mask>`s or `<clipPath>`s need this flexibility. Implementing this feature using `setAttributeNS()` would require to receive a string to append and/or prepend, or to invert control and call a function that would return a transformed `Definition` to use in `setAttributeNS()`.
+While adding a frame (this is what the above code does) to a path is not very usefull, some use cases involving SVG `<mask>`s or `<clipPath>`s require this flexibility. Implementing this feature using `setAttributeNS()` would imply receiving a string to append and/or prepend, or inverting control to call a function that would return a transformed `Definition` to use in `setAttributeNS()`.
 
 Related: https://overreacted.io/react-as-a-ui-runtime/
 
@@ -21,7 +21,7 @@ Related: https://overreacted.io/react-as-a-ui-runtime/
 
 Related: https://overreacted.io/a-complete-guide-to-useeffect/
 
-Using `requestAnimationFrame` and `cancelAnimationFrame` in hooks is a bit tricky. [Some](https://github.com/facebook/react/issues/14227#issuecomment-447627402) [people](https://github.com/streamich/react-use/blob/master/src/useRaf.ts) [claim](https://stackoverflow.com/questions/53781632/whats-useeffect-execution-order-and-its-internal-clean-up-logic-in-react-hooks) that `useLayoutEffect` (synchronous) should be used in place of `useEffect` (asynchronous) to run `requestAnimationFrame(update)` (asynchronous `update` via `useState`, the effect function) and `cancelAnimationFrame` (synchronous, the cleanup function), to avoid an update on an unmounted component and the related error that is thrown even when calling `cancelAnimationFrame` in the cleanup function of `useEffect`.
+Using `requestAnimationFrame` and `cancelAnimationFrame` in hooks is a bit tricky. [Some](https://github.com/facebook/react/issues/14227#issuecomment-447627402) [people](https://github.com/streamich/react-use/blob/master/src/useRaf.ts) [claim](https://stackoverflow.com/questions/53781632/whats-useeffect-execution-order-and-its-internal-clean-up-logic-in-react-hooks) that `useLayoutEffect` should be used in place of `useEffect` to run `requestAnimationFrame(update)` (asynchronous `update` via `useState`, the effect function) and `cancelAnimationFrame` (synchronous cleanup function), to avoid an update on an unmounted component and the related error that is thrown even when calling `cancelAnimationFrame` in the cleanup function of `useEffect`.
 
 > *Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.*
 
@@ -31,8 +31,8 @@ When using `useEffect`, the runtime order is:
 Render Element 1 ------------------> Render Element 2 --------->
 > render 1                           > unmount 1  > render 2
   > useEffect                          > useEffect
-    > cancelAnimationFrame               > cancelAnimationFrame
-      > requestAnimationFrame(update)      > (failed) update
+                                         > cancelAnimationFrame
+    > requestAnimationFrame(update)        > (failed) update
 ```
 
 `useEffect` throws an error with the message from above.
@@ -41,13 +41,13 @@ When using `useLayoutEffect`, the runtime order is:
 
 ```
 Render Element 1 ------------------> Render Element 2 --------->
-    > render 1                           > unmount 1  > render 2
+  > render 1                             > unmount 1  > render 2
 > useLayoutEffect                    > useLayoutEffect
-  > cancelAnimationFrame               > cancelAnimationFrame
-      > requestAnimationFrame(update)      > (failed) update
+                                       > cancelAnimationFrame
+    > requestAnimationFrame(update)        > (failed) update
 ```
 
-The `update` fails without throwing an error, as it has been cancelled by React with all `update`s that were scheduled but couldn't have been run before the component unmounts.
+The `update` fails without throwing an error: React cancels all `update`s that were scheduled but couldn't have been run before the component unmounts.
 
 **Note (not well documented):** before being unmounted, a parent component triggers the cleanup then the effect function of its child components from bottom to top then its own cleanup and effect functions, while `useLayoutEffect` triggers the cleanup functions from all child components then its own, and finally all effects and then its own.
 
@@ -59,7 +59,7 @@ Issue #14369: ([setState hook inside useEffect can cause unavoidable warning](ht
 
 *A much simpler solution* is to make the `update` (effect) function aware of the cancellation state ([reference](https://github.com/facebook/react/issues/14369#issuecomment-468267798)).
 
-Here, the cancellation state is handled in `Animation.Frame`, which will `run()` the animation and return a reference to a `TaskExecution` with a `cancel()` method. Whenever a component using this hook unmounts or the `currentIndex` of the `Definition` to render is updated before the previous `TaskExecution` resolves, the latter has to be `cancel()`ed in order to prevent the asynchronous the `update`, ie. `setDefinitinion` (while the animation is running) or `setCurrentIndex` (after the animation has run).
+Here, the cancellation state is handled in `Animation.Frame`, which will `run()` the animation and return a reference to a `TaskExecution` with a `cancel()` method. Whenever a component using this hook unmounts or the `currentIndex` of the `Definition` to render updates before the previous `TaskExecution` resolves, the latter has to be `cancel()`ed in order to prevent asynchronous `update`s, ie. `setDefinitinion` (while the animation is running) or `setCurrentIndex` (after the animation has run).
 
 It is done automatically by calling `TaskExecution.cancel()` in the cleanup function of `useEffet()`, using `currentIndex` and `definitions` as dependencies.
 
@@ -69,11 +69,11 @@ It is done automatically by calling `TaskExecution.cancel()` in the cleanup func
 
 **Command:** a definition of a movement on the SVG canvas.
 
-**Command type:** a letter for the movement type, ie. a move without drawing anything, or the drawing of a line or a curve, or a drawing to close the path.
+**Command type:** a letter for the movement type, ie. either moving without drawing anything, drawing a line or a curve, or drawing a line to close the path.
 
-**Command point:** a collection of parameters and values for a movement from a start point to an end point.
+**Command point:** a collection of grouped parameters describing one or multiple movements from a start point to an end point, ie. in vector graphic softwares for a cubic command, one or multiple points attached to a pair of curve handles.
 
-**Command group:** a unit collection of parameters in a point ie. for a cubic command, a point with a pair of curve handles in vector graphic softwares.
+**Command group:** a record of parameters gathered to ease the math to convert a command into a cubic command type, ie. `{ x: Number, y: Number }` for a parameter of a cubic command.
 
 # Transforming a point to a cubic command point
 
