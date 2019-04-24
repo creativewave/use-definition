@@ -50,8 +50,7 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
     const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
     const [currentIndex, setCurrentIndex] = React.useState(startIndex)
     const [definition, setDefinition] = React.useState(serializeDefinition(defs[currentIndex]))
-    const animation = React.useRef(null)
-    const sequence = React.useRef(null)
+    const animation = React.useRef()
 
     /**
      * animateTo :: NextIndex -> TimingFunction -> {
@@ -120,7 +119,7 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
     }, [currentIndex, defs])
 
     // Cancel animation before component updates or unmounts
-    React.useEffect(() => () => animation.current && animation.current.cancel(), [animation, sequence])
+    React.useEffect(() => () => animation.current && animation.current.cancel(), [animation])
 
     return [definition, animateTo]
 }
