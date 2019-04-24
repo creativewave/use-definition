@@ -127,7 +127,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 ##### Expected arguments:
 
-`animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'ease-out-cubic'`.
+`animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'easeOutCubic'`.
 
 `NextIndex` should be either an index `Number` of the next definition to transition to, or a function receiving the current index and returning the next index.
 

@@ -63,7 +63,7 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
      * TimingFunction :: (Number -> Number) | String
      *                :: (Number -> [Point] -> Number) | String
      */
-    const animateTo = React.useCallback((nextIndex, pointTimingFunction = 'ease-out') => {
+    const animateTo = React.useCallback((nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
         const toIndex = typeof nextIndex === 'function' ? nextIndex(currentIndex) : nextIndex
         const from = defs[currentIndex]
