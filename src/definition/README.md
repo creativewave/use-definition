@@ -15,11 +15,13 @@
 
 While adding a frame (this is what the above code does) to a path is not very usefull, some use cases involving SVG `<mask>`s or `<clipPath>`s require this flexibility. Implementing this feature using `setAttributeNS()` would imply receiving a string to append and/or prepend, or inverting control to call a function that would return a transformed `Definition` to use in `setAttributeNS()`.
 
-Related: https://overreacted.io/react-as-a-ui-runtime/
-
 **How to cancel an animation before a component updates or unmounts?**
 
-Related: https://overreacted.io/a-complete-guide-to-useeffect/
+Related:
+
+- https://overreacted.io/making-setinterval-declarative-with-react-hooks/
+- https://overreacted.io/a-complete-guide-to-useeffect/
+- https://overreacted.io/react-as-a-ui-runtime/
 
 Using `requestAnimationFrame` and `cancelAnimationFrame` in hooks is a bit tricky. [Some](https://github.com/facebook/react/issues/14227#issuecomment-447627402) [people](https://github.com/streamich/react-use/blob/master/src/useRaf.ts) [claim](https://stackoverflow.com/questions/53781632/whats-useeffect-execution-order-and-its-internal-clean-up-logic-in-react-hooks) that `useLayoutEffect` should be used in place of `useEffect` to run `requestAnimationFrame(update)` (asynchronous `update` via `useState`, the effect function) and `cancelAnimationFrame` (synchronous cleanup function), to avoid an update on an unmounted component and the related error that is thrown even when calling `cancelAnimationFrame` in the cleanup function of `useEffect`.
 
