@@ -54,7 +54,10 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
     const sequence = React.useRef(null)
 
     /**
-     * animateTo :: NextIndex -> TimingFunction -> { sequence: Task, run: Identity }
+     * animateTo :: NextIndex -> TimingFunction -> {
+     *   sequence: Frame,
+     *   run: Frame -> TaskExecution,
+     * }
      *
      * NextIndex :: (Number -> Number) | Number
      * TimingFunction :: (Number -> Number) | String

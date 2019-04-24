@@ -117,13 +117,13 @@ It will be automatically updated while transitionning to another definition.
 
 The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
-`animateTo :: (NextIndex, TimingFunction?) -> { sequence: Task, run: Identity }`
+`animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Frame -> TaskExecution }`
 
-`NextIndex :: Number | (Number -> Number)`
-
-`TimingFunction :: String | ((Number, [Point, Point]?) -> Number)`
-
-`Identity :: a -> a`
+- `NextIndex :: Number`
+- `NextIndex :: Number -> Number`
+- `TimingFunction :: String`
+- `TimingFunction :: Number -> Number`
+- `TimingFunction :: (Number, [Point, Point]) -> Point`
 
 ##### Expected arguments:
 
@@ -142,7 +142,7 @@ For example, a linear timing function that receive parameters going from `{ x: 0
 
 `animateTo` will return an object with the following properties:
 
-- `sequence`: a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) to chain consecutive(s) animation(s)
+- `sequence`: a `Frame` object wrapping a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) internally, that can be used to chain consecutive(s) animation(s)
 - `run`: a function to run the sequence of animation(s)
 
 The latter is a dirty trick to automatically cancel the animation when the component has its definition animated while it is either updated or unmounted.
