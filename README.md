@@ -131,7 +131,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `NextIndex` should be either an index `Number` of the next definition to transition to, or a function receiving the current index and returning the next index.
 
-`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a parameter from the initial definition and its corresponding parameter from the definition to transition to. The behavior of this timing function will vary depending on its parameters:
+`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a parameter from the initial definition and its corresponding parameter from the definition to transition to. The behavior of this function should vary depending on its parameters length:
 
 - if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
 - otherwise, it should return the new parameter directly
