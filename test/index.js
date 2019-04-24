@@ -8,29 +8,33 @@ import { serializeDefinition } from '../src/definition/serialize'
 import setAnimations from '../src/definition/animate'
 import uniqWith from 'lodash/fp/uniqWith'
 
+// Debug all command types with:
+// <svg viewBox="0 0 4 4">
+//   <path d="M0 2 <initial-type> <...initial-points> z" fill="#ff000033" />
+//   <path d="M0 2 C <...normalized-points> z" fill="#ff000033" />
+// </svg>
+
 /* eslint-disable array-element-newline */
 const commands = {
-    // Debug it with: <svg viewBox="0 0 10 10"><path d="M0 5..." /></svg>
     A: {
         normalized: {
             points: [
-                { x: 0, y: 8.85 }, { x: 4.17, y: 11.25 }, { x: 7.5, y: 9.33 },
-                { x: 9.05, y: 8.44 }, { x: 10, y: 6.79 }, { x: 10, y: 5 },
-                { x: 10, y: 1.15 }, { x: 5.83, y: -1.25 }, { x: 2.5, y: 0.67 },
-                { x: 0.95, y: 1.56 }, { x: 0, y: 3.21 }, { x: 0, y: 5 },
+                { x: 0, y: 3.54 }, { x: 1.67, y: 4.5 }, { x: 3, y: 3.73 },
+                { x: 3.62, y: 3.37 }, { x: 4, y: 2.71 }, { x: 4, y: 2 },
+                { x: 4, y: 0.46 }, { x: 2.33, y: -0.5 }, { x: 1, y: 0.27 },
+                { x: 0.38, y: 0.63 }, { x: 0, y: 1.29 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
         parsed: {
             points: [
-                { angle: '0', fA: '1', fS: '0', rx: '5', ry: '5', x: '10', y: '5' },
-                { angle: '0', fA: '1', fS: '0', rx: '5', ry: '5', x: '0', y: '5' },
+                { angle: '0', fA: '1', fS: '0', rx: '2', ry: '2', x: '4', y: '2' },
+                { angle: '0', fA: '1', fS: '0', rx: '2', ry: '2', x: '0', y: '2' },
             ],
             type: 'A',
         },
-        raw: 'A5 5 0 1 0 10 5 5 5 0 1 0 0 5',
+        raw: 'A2 2 0 1 0 4 2 2 2 0 1 0 0 2',
     },
-    // Debug it with: <svg viewBox="0 0 4 4"><path d="M0 2..."></svg>
     C: {
         normalized: {
             points: [
@@ -49,96 +53,122 @@ const commands = {
         },
         raw: 'C0 1 1 0 2 0 3 0 4 1 4 2',
     },
-    // Debug it with: <svg viewBox="0 0 2 0"><path d="M0 0..."></svg>
     H: {
         normalized: {
             points: [
-                { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0 },
-                { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2, y: 0 },
-                { x: 2, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
+                { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 2, y: 2 },
+                { x: 2, y: 2 }, { x: 4, y: 2 }, { x: 4, y: 2 },
+                { x: 4, y: 2 }, { x: 0, y: 2 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
         parsed: {
-            points: [{ x: '1' }, { x: '2' }],
+            points: [{ x: '2' }, { x: '4' }],
             type: 'H',
         },
-        raw: 'H1 2',
+        raw: 'H2 4',
     },
-    // Debug it with: <svg viewBox="0 0 1 1"><path d="M0 0..."></svg>
     L: {
         normalized: {
             points: [
-                { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0 },
-                { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 1 },
-                { x: 1, y: 1 }, { x: 0, y: 0 }, { x: 0, y: 0 },
+                { x: 0, y: 2 }, { x: 4, y: 0 }, { x: 4, y: 0 },
+                { x: 4, y: 0 }, { x: 4, y: 4 }, { x: 4, y: 4 },
+                { x: 4, y: 4 }, { x: 0, y: 2 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
         parsed: {
-            points: [{ x: '1', y: '0' }, { x: '1', y: '1' }],
+            points: [{ x: '4', y: '0' }, { x: '4', y: '4' }],
             type: 'L',
         },
-        raw: 'L1 0 1 1',
+        raw: 'L4 0 4 4',
     },
     M: {
-        normalized: { points: [{ x: 0, y: 0 }], type: 'M' },
-        parsed: { points: [{ x: '0', y: '0' }], type: 'M' },
-        raw: 'M0 0',
+        normalized: { points: [{ x: 0, y: 2 }], type: 'M' },
+        parsed: { points: [{ x: '0', y: '2' }], type: 'M' },
+        raw: 'M0 2',
     },
-    // Debug it with: <svg viewBox="0 0 4 1"><path ="M0 1..." /></svg>
     Q: {
         normalized: {
             points: [
-                { x: 0 + ((2 / 3) * (1 - 0)), y: 1 + ((2 / 3) * (0 - 1)) },
-                { x: 2 + ((2 / 3) * (1 - 2)), y: 1 + ((2 / 3) * (0 - 1)) },
-                { x: 2, y: 1 },
-                { x: 2 + ((2 / 3) * (3 - 2)), y: 1 + ((2 / 3) * (0 - 1)) },
-                { x: 4 + ((2 / 3) * (3 - 4)), y: 1 + ((2 / 3) * (0 - 1)) },
-                { x: 4, y: 1 },
-                { x: 4, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 1 },
+                { x: 0 + ((2 / 3) * (1 - 0)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 2 + ((2 / 3) * (1 - 2)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 2, y: 2 },
+                { x: 2 + ((2 / 3) * (3 - 2)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 4 + ((2 / 3) * (3 - 4)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 4, y: 2 },
+                { x: 4, y: 2 }, { x: 0, y: 2 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
-        parsed: { points: [{ x: '1', y: '0' }, { x: '2', y: '1' }, { x: '3', y: '0' }, { x: '4', y: '1' }], type: 'Q' },
-        raw: 'Q1 0 2 1 3 0 4 1',
+        parsed: { points: [{ x: '1', y: '0' }, { x: '2', y: '2' }, { x: '3', y: '0' }, { x: '4', y: '2' }], type: 'Q' },
+        raw: 'Q1 0 2 2 3 0 4 2',
     },
-    // Debug it with: <svg viewBox="0 0 2 1"><path d="M0 1..." /></svg>
     S: {
         normalized: {
             points: [
-                { x: 0, y: 1 }, { x: 0, y: 0 }, { x: 1, y: 0 },
-                { x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 1 },
-                { x: 2, y: 1 }, { x: 0, y: 1 }, { x: 0, y: 1 },
+                { x: 0, y: 2 }, { x: 0, y: 0 }, { x: 2, y: 0 },
+                { x: 4, y: 0 }, { x: 4, y: 2 }, { x: 4, y: 2 },
+                { x: 4, y: 2 }, { x: 0, y: 2 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
         parsed: {
-            points: [{ x: '0', y: '0' }, { x: '1', y: '0' }, { x: '2', y: '1' }, { x: '2', y: '1' }],
+            points: [{ x: '0', y: '0' }, { x: '2', y: '0' }, { x: '4', y: '2' }, { x: '4', y: '2' }],
             type: 'S',
         },
-        raw: 'S0 0 1 0 2 1 2 1',
+        raw: 'S0 0 2 0 4 2 4 2',
     },
-    // Debug it with: see test cases
     T: {
-        parsed: { points: [{ x: '1', y: '1' }, { x: '2', y: '2' }], type: 'T' },
-        raw: 'T1 1 2 2',
+        /**
+         * normalized :: void -> Command
+         *
+         * Memo: a getter is used in order to keep test cases idiomatic, and to
+         * use variables required to avoid false negative test result related to
+         * rounding errors.
+         *
+         * Memo: `t|T` are pointless without a previous `q|Q` (see /README.md).
+         *
+         * TODO: search for some "official" maths to convert T to C.
+         */
+        get normalized() {
+            const [Q1, { x: Qx2, y: Qy2 }, { x: Qx, y: Qy }] = [
+                { x: 0 + ((2 / 3) * (1 - 0)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 2 + ((2 / 3) * (1 - 2)), y: 2 + ((2 / 3) * (0 - 2)) },
+                { x: 2, y: 2 },
+            ] // = commands.Q.normalized.points.slice(0, 3)
+            const T1x2 = 4 > Qx ? 4 + (Qx - (4 - Qx2)) : 4 - (Qx - (4 - Qx2))
+            const T1y2 = 2 > Qy ? 2 + (Qy - (4 - Qy2)) : 2 - (Qy - (4 - Qy2))
+            const T2x2 = 6 + (4 - (8 - T1x2))
+            const T2y2 = 2 - (2 - (4 - T1y2))
+
+            return {
+                points: [
+                    Q1, { x: Qx2, y: Qy2 }, { x: Qx, y: Qy },
+                    { x: 4 - Qx2, y: 4 - Qy2 }, { x: T1x2, y: T1y2 }, { x: 4, y: 2 },
+                    { x: 8 - T1x2, y: 4 - T1y2 }, { x: T2x2, y: T2y2 }, { x: 6, y: 2 },
+                    { x: 6, y: 2 }, { x: 0, y: 2 }, { x: 0, y: 2 },
+                ],
+                type: 'C',
+            }
+        },
+        parsed: { points: [{ x: '4', y: '2' }, { x: '6', y: '2' }], type: 'T' },
+        raw: 'T4 2 6 2',
     },
-    // Debug it with: <svg viewBox="0 0 0 2"><path d="M0 0..."></svg>
     V: {
         normalized: {
             points: [
-                { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 1 },
-                { x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 2 },
-                { x: 0, y: 2 }, { x: 0, y: 0 }, { x: 0, y: 0 },
+                { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 3 },
+                { x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 4 },
+                { x: 0, y: 4 }, { x: 0, y: 2 }, { x: 0, y: 2 },
             ],
             type: 'C',
         },
         parsed: {
-            points: [{ y: '1' }, { y: '2' }],
+            points: [{ y: '3' }, { y: '4' }],
             type: 'V',
         },
-        raw: 'V1 2',
+        raw: 'V3 4',
     },
     z: {
         normalized: { points: [], type: 'z' },
@@ -381,7 +411,7 @@ describe('definition#normalize()', () => {
 
         const actual = normalizeCommands([
             commands.M.parsed,
-            { points: [{ x: '1', y: '0' }, { x: '0', y: '1' }], type: 'l' },
+            { points: [{ x: '4', y: '-2' }, { x: '0', y: '4' }], type: 'l' },
             commands.z.parsed,
         ])
         const expected = [commands.M.normalized, commands.L.normalized, commands.z.normalized]
@@ -399,7 +429,7 @@ describe('definition#normalize()', () => {
 
         const actual = normalizeCommands([
             commands.M.parsed,
-            { points: [{ x: '1' }, { x: '1' }], type: 'h' },
+            { points: [{ x: '2' }, { x: '2' }], type: 'h' },
             commands.z.parsed,
         ])
         const expected = [commands.M.normalized, commands.H.normalized, commands.z.normalized]
@@ -427,7 +457,7 @@ describe('definition#normalize()', () => {
     it('should normalize command type c -> C', () => {
 
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '2' }], type: 'M' },
+            commands.M.parsed,
             {
                 points: [
                     { x: '0', y: '-1' },
@@ -441,163 +471,91 @@ describe('definition#normalize()', () => {
             },
             commands.z.parsed,
         ])
-        const expected = [{ points: [{ x: 0, y: 2 }], type: 'M' }, commands.C.normalized, commands.z.normalized]
+        const expected = [commands.M.normalized, commands.C.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type S -> C', () => {
 
-        const actual = normalizeCommands([
-            { points: [{ x: '0', y: '1' }], type: 'M' },
-            commands.S.parsed,
-            commands.z.parsed,
-        ])
-        const expected = [{ points: [{ x: 0, y: 1 }], type: 'M' }, commands.S.normalized, commands.z.normalized]
+        const actual = normalizeCommands([commands.M.parsed, commands.S.parsed, commands.z.parsed])
+        const expected = [commands.M.normalized, commands.S.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type s -> C', () => {
 
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '1' }], type: 'M' },
-            { points: [{ x: '0', y: '-1' }, { x: '1', y: '-1' }, { x: '1', y: '1' }, { x: '1', y: '1' }], type: 's' },
+            commands.M.parsed,
+            { points: [{ x: '0', y: '-2' }, { x: '2', y: '-2' }, { x: '2', y: '2' }, { x: '2', y: '2' }], type: 's' },
             commands.z.parsed,
         ])
-        const expected = [{ points: [{ x: 0, y: 1 }], type: 'M' }, commands.S.normalized, commands.z.normalized]
+        const expected = [commands.M.normalized, commands.S.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type Q -> C', () => {
 
-        const actual = normalizeCommands([
-            { points: [{ x: '0', y: '1' }], type: 'M' },
-            commands.Q.parsed,
-            commands.z.parsed,
-        ])
-        const expected = [{ points: [{ x: 0, y: 1 }], type: 'M' }, commands.Q.normalized, commands.z.normalized]
+        const actual = normalizeCommands([commands.M.parsed, commands.Q.parsed, commands.z.parsed])
+        const expected = [commands.M.normalized, commands.Q.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type q -> C', () => {
 
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '1' }], type: 'M' },
-            { points: [{ x: '1', y: '-1' }, { x: '2', y: '0' }, { x: '1', y: '-1' }, { x: '2', y: '0' }], type: 'q' },
+            commands.M.parsed,
+            { points: [{ x: '1', y: '-2' }, { x: '2', y: '0' }, { x: '1', y: '-2' }, { x: '2', y: '0' }], type: 'q' },
             commands.z.parsed,
         ])
-        const expected = [{ points: [{ x: 0, y: 1 }], type: 'M' }, commands.Q.normalized, commands.z.normalized]
+        const expected = [commands.M.normalized, commands.Q.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type T -> C', () => {
 
-        // TODO: find or search for the "official" maths to convert T to C
-
-        // <svg viewBox="0 0 6 6">
-        //     <path d="M 0 3
-        //             Q 1 0  2 3
-        //             T 4 3  6 3" fill="#ff000066" />
-        //     <path d="M 0 3
-        //             C 0.67 1  1.33 1  2 3
-        //             C 2.67 5  3.33 5  4 3
-        //             C 4.67 1  5.33 1  6 3" fill="#ff000066" />
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '3' }], type: 'M' },
-            { points: [{ x: '0.67', y: '1' }, { x: '1.33', y: '1' }, { x: '2', y: '3' }], type: 'C' },
-            { points: [{ x: '4', y: '3' }, { x: '6', y: '3' }], type: 'T' },
-            { points: [], type: 'z' },
+            commands.M.parsed,
+            { points: commands.Q.parsed.points.slice(0, 2), type: 'Q' },
+            commands.T.parsed,
+            commands.z.parsed,
         ])
-        const expected = [
-            { points: [{ x: 0, y: 3 }], type: 'M' },
-            {
-                points: [
-                    { x: 0.67, y: 1 },
-                    { x: 1.33, y: 1 },
-                    { x: 2, y: 3 },
-                    { x: 2.67, y: 5 },
-                    { x: 3.33, y: 5 },
-                    { x: 4, y: 3 },
-                    { x: 4.67, y: 1 },
-                    { x: 5.33, y: 1 },
-                    { x: 6, y: 3 },
-                    { x: 6, y: 3 },
-                    { x: 0, y: 3 },
-                    { x: 0, y: 3 },
-                ],
-                type: 'C',
-            },
-            { points: [], type: 'z' },
-        ]
+        const expected = [commands.M.normalized, commands.T.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type t -> C', () => {
 
-        // TODO: see previous test case.
-
-        // <svg viewBox="0 0 6 6">
-        //     <path d="M 0 3
-        //             C 0.67 1  1.33 1  2 3     // -> Q 1 0  2 3
-        //             t 2 0  2 0" fill="#ff000066" />
-        //     <path d="M 0 3
-        //             C 0.67 1  1.33 1  2 3
-        //             C 2.67 5  3.33 5  4 3
-        //             C 4.67 1  5.33 1  6 3" fill="#ff000066" />
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '3' }], type: 'M' },
-            { points: [{ x: '0.67', y: '1' }, { x: '1.33', y: '1' }, { x: '2', y: '3' }], type: 'C' },
+            commands.M.parsed,
+            { points: commands.Q.parsed.points.slice(0, 2), type: 'Q' },
             { points: [{ x: '2', y: '0' }, { x: '2', y: '0' }], type: 't' },
-            { points: [], type: 'z' },
+            commands.z.parsed,
         ])
-        const expected = [
-            { points: [{ x: 0, y: 3 }], type: 'M' },
-            {
-                points: [
-                    { x: 0.67, y: 1 },
-                    { x: 1.33, y: 1 },
-                    { x: 2, y: 3 },
-                    { x: 2.67, y: 5 },
-                    { x: 3.33, y: 5 },
-                    { x: 4, y: 3 },
-                    { x: 4.67, y: 1 },
-                    { x: 5.33, y: 1 },
-                    { x: 6, y: 3 },
-                    { x: 6, y: 3 },
-                    { x: 0, y: 3 },
-                    { x: 0, y: 3 },
-                ],
-                type: 'C',
-            },
-            { points: [], type: 'z' },
-        ]
+        const expected = [commands.M.normalized, commands.T.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type A -> C', () => {
 
-        const actual = normalizeCommands([
-            { points: [{ x: '0', y: '5' }], type: 'M' },
-            commands.A.parsed,
-            commands.z.parsed,
-        ])
-        const expected = [{ points: [{ x: 0, y: 5 }], type: 'M' }, commands.A.normalized, commands.z.normalized]
+        const actual = normalizeCommands([commands.M.parsed, commands.A.parsed, commands.z.parsed])
+        const expected = [commands.M.normalized, commands.A.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
     it('should normalize command type a -> C', () => {
 
         const actual = normalizeCommands([
-            { points: [{ x: '0', y: '5' }], type: 'M' },
+            commands.M.parsed,
             {
                 points: [
-                    { angle: '0', fA: '1', fS: '0', rx: '5', ry: '5', x: '10', y: '0' },
-                    { angle: '0', fA: '1', fS: '0', rx: '5', ry: '5', x: '-10', y: '0' },
+                    { angle: '0', fA: '1', fS: '0', rx: '2', ry: '2', x: '4', y: '0' },
+                    { angle: '0', fA: '1', fS: '0', rx: '2', ry: '2', x: '-4', y: '0' },
                 ],
                 type: 'a',
             },
             commands.z.parsed,
         ])
-        const expected = [{ points: [{ x: 0, y: 5 }], type: 'M' }, commands.A.normalized, commands.z.normalized]
+        const expected = [commands.M.normalized, commands.A.normalized, commands.z.normalized]
 
         assert.deepStrictEqual(actual, expected)
     })
