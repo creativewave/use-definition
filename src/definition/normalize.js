@@ -67,15 +67,16 @@ export const normalizePoints = minPoints => definition => {
  *
  * TODO(refactoring): with fresh eyes...
  */
-export const normalizeCommand = startPoint => (points, command) => {
+export const normalizeCommand = startPoint => (points, command, commandIndex, commands) => {
 
     if (command.type === 'C') {
         points.push(...command.points.map(mapValues(Number)))
         return points
     }
 
+    const type = command.type.toLowerCase()
     const groups = []
-    const GroupsLength = Point[command.type.toLowerCase()].length
+    const GroupsLength = Point[type].length
 
     for (let pointIndex = 0; pointIndex < command.points.length; pointIndex++) {
 
@@ -83,79 +84,95 @@ export const normalizeCommand = startPoint => (points, command) => {
         const { x, y } =  Maybe.fromNullable(last(groups))
             .orElse(() => Maybe.fromNullable(last(points)))
                                .getOrElse(startPoint)
-
-        // (x2, y2) Last start control parameters (from current, previous, or last command)
+        // (x2, y2) Last end control parameters (from current, previous, or last command)
         const startControl = Maybe
             .fromNullable(groups[groups.length - 2])
-            .orElse(() => Maybe.fromNullable(points[points.length - 2]))
-            // TODO(fix): it should fallback to the last end control parameters of the (normalized) path
-            // but never to startPoint (the first position point of the path), ie:
-            // .orElse(() => Maybe.Just(lastEndControlPoint))
-            // Note: this confusion comes from line commands which should receive a start control === startPoint
-            .map(({ x: startX = 0, y: startY = 0 }) => ({ x: (x * 2) - startX, y: (y * 2) - startY }))
-            .getOrElse(startPoint)
-            // .getOrElse('?')
+            .orElse(() => Maybe.fromNullable(commands[commandIndex - 1])
+                .chain(({ type: previousType }) => {
+                    // See ./README.md for the special case handled here.
+                    switch (previousType) {
+                        case 'C':
+                        case 'c':
+                        case 'S':
+                        case 's':
+                            return type === 's'
+                                ? Maybe.fromNullable(points[points.length - 2])
+                                : Maybe.Nothing()
+                        case 'Q':
+                        case 'q':
+                        case 'T':
+                        case 't':
+                            return type === 't'
+                                ? Maybe.fromNullable(points[points.length - 2])
+                                : Maybe.Nothing()
+                        default:
+                            return Maybe.Nothing()
+                    }
+                }))
+            .map(({ x: x2, y: y2 }) => ({ x: (x * 2) - x2, y: (y * 2) - y2 }))
+            .getOrElse({ x, y })
 
-        // First point of the current command
-        const point = mapValues(Number, command.points[pointIndex])
-        // Position point of the current command
+        // First group of parameters the current command
+        const group = mapValues(Number, command.points[pointIndex])
+        // Last group of parameters (end position) of the current command
         const position = mapValues(Number, command.points[pointIndex + GroupsLength - 1])
 
         switch (command.type) {
             case 'A':
-                groups.push(...getCubicFromArc({ x, y }, point))
+                groups.push(...getCubicFromArc({ x, y }, group))
                 break
             case 'a':
-                groups.push(...getCubicFromArc({ x, y }, { ...point, x: point.x + x, y: point.y + y }))
-                break
-            case 'C':
-            case 'L':
-            case 'S':
-                groups.push(startControl, point, position)
+                groups.push(...getCubicFromArc({ x, y }, { ...group, x: group.x + x, y: group.y + y }))
                 break
             case 'c':
                 groups.push(...[
-                    point,
+                    group,
                     mapValues(Number, command.points[pointIndex + 1]),
                     position,
                 ].map(p => ({ x: p.x + x, y: p.y + y })))
                 break
+            case 'L':
+                groups.push({ x, y }, group, position)
+                break
             case 'l':
-                groups.push({ x, y }, ...[point, position].map(p => ({ x: p.x + x, y: p.y + y })))
+                groups.push({ x, y }, ...[group, position].map(p => ({ x: p.x + x, y: p.y + y })))
                 break
             case 'H':
-                groups.push({ x, y }, { ...point, y }, { ...position, y })
+                groups.push({ x, y }, { ...group, y }, { ...position, y })
                 break
             case 'h':
-                groups.push({ x, y }, { x: point.x + x, y }, { x: position.x + x, y })
+                groups.push({ x, y }, { x: group.x + x, y }, { x: position.x + x, y })
                 break
             case 'Q':
                 groups.push(
-                    { x: x + (2 / 3 * (point.x - x)), y: y + (2 / 3 * (point.y - y)) },
-                    { x: position.x + (2 / 3 * (point.x - position.x)), y: position.y + (2 / 3 * (point.y - position.y)) },
+                    { x: x + (2 / 3 * (group.x - x)), y: y + (2 / 3 * (group.y - y)) },
+                    { x: position.x + (2 / 3 * (group.x - position.x)), y: position.y + (2 / 3 * (group.y - position.y)) },
                     position)
                 break
             case 'q':
                 groups.push(
-                    { x: x + (2 / 3 * point.x), y: y + (2 / 3 * point.y) },
-                    { x: position.x + x + (2 / 3 * (point.x - position.x)), y: position.y + (y + (2 / 3 * (point.y - position.y))) },
+                    { x: x + (2 / 3 * group.x), y: y + (2 / 3 * group.y) },
+                    { x: position.x + x + (2 / 3 * (group.x - position.x)), y: position.y + (y + (2 / 3 * (group.y - position.y))) },
                     { x: position.x + x, y: position.y + y })
                 break
             case 'V':
-                groups.push(startControl, { ...point, x }, { ...position, x })
+                groups.push({ x, y }, { ...group, x }, { ...position, x })
                 break
             case 'v':
-                groups.push(startControl, { x, y: point.y + y }, { x, y: position.y + y })
+                groups.push({ x, y }, { x, y: group.y + y }, { x, y: position.y + y })
+                break
+            case 'S':
+                groups.push(startControl, group, position)
                 break
             case 's':
-                groups.push(startControl, ...[point, position].map(p => ({ x: p.x + x, y: p.y + y })))
+                groups.push(startControl, ...[group, position].map(p => ({ x: p.x + x, y: p.y + y })))
                 break
             case 'T':
                 groups.push(
                     startControl,
                     {
-                        x: point.x > x ? point.x + (x - startControl.x) : point.x - (x - startControl.x),
-                        y: point.y > y ? point.y + (y - startControl.y) : point.y - (y - startControl.y),
+                        x: group.x > x ? group.x + (x - startControl.x) : group.x - (x - startControl.x),
+                        y: group.y > y ? group.y + (y - startControl.y) : group.y - (y - startControl.y),
                     },
                     position)
                 break
@@ -163,8 +180,8 @@ export const normalizeCommand = startPoint => (points, command) => {
                 groups.push(
                     startControl,
                     {
-                        x: point.x + x > x ? point.x + x + (x - startControl.x) : point.x + x - (x - startControl.x),
-                        y: point.y + y > y ? point.y + y + (y - startControl.y) : point.y + y - (y - startControl.y),
+                        x: group.x + x > x ? group.x + x + (x - startControl.x) : group.x + x - (x - startControl.x),
+                        y: group.y + y > y ? group.y + y + (y - startControl.y) : group.y + y - (y - startControl.y),
                     },
                     { x: position.x + x, y: position.y + y })
                 break
