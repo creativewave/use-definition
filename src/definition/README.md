@@ -116,9 +116,6 @@ For clarity purpose, `P`revious is an alias to the previous point which has the 
 | **h** | [P, [x, y], [hx + x, y], [hx + x, y]]                |
 | **V** | [P, [x, y], [x, Vy], [x, Vy]]                        |
 | **v** | [P, [x, y], [x, vy + y], [x, vy + y]]                |
-
-| Type  | Transformation from [P, Point[Type]] to [P, Point.C]                  |
-| ----- | --------------------------------------------------------------------- |
 | **S** | [P, [x, y]*, [Sx1, Sy1], [Sx2, Sy2]]                 |
 | **s** | [P, [x, y]*, [sx1 + x, sy1 + y], [sx2 + x, sy2 + y]] |
 | **c** | [P, [cx1 + x, cy1 + y], [cx2 + x, cy2 + y], [cx3 + x, cy3 + y]]       |
@@ -126,8 +123,8 @@ For clarity purpose, `P`revious is an alias to the previous point which has the 
 | **q** | [P, [x + 2/3 * qx1, y + 2/3 * qy1], [qx2 + x + 2/3 * (qx1 - qx2), qy2 + y + 2/3 * (qy1 - qy2)], [qx2 + x, qy2 + y]] |
 | **T** | [P, [x, y]*, [Tx > x ? Tx + (x - x2) : Tx - (x - x2), Ty > y ? Ty + (y - y2) : Ty - (y - y2)], [Tx, Ty]] |
 | **t** | [P, [x, y]*, [Tx + x > x ? Tx + x + (x - x2) : Ty + y - (y - y2), Ty + y > y ? Ty + y + (y - y2) : Ty + y - (y - y2)], [tx + x, ty + y]] |
-| **A** | [P, [?], [?], [Ax, Ay]]                                               |
-| **a** | [P, [?], [?], [ax + x, ay + y]]                                       |
+| **A** | [P, [?], [?], [Ax, Ay]]                              |
+| **a** | [P, [?], [?], [ax + x, ay + y]]                      |
 
 **(*) Special case:** consecutive points from command types `s|S` or `t|T` should use the previous end point parameters as their start control parameters if the last point is not from a cubic or a quadratic command, respectively. Otherwhise, its start control parameters should be a reflection of the previous end control parameters using the previous end point parameters as the anchor point of a symetric transformation:
 
@@ -144,7 +141,7 @@ For clarity purpose, `P`revious is an alias to the previous point which has the 
 The result of this behavior is that:
 
 - if a command type `s|S` follows a command which has the same "parent" type, ie. a cubic bézier curve, it will get its path slightly shifted as its start control parameter will reflect the previous end control parameters instead of being "null", ie. at the previous end position
-- if a command type `s|S` doesn't follow a command which has the same "parent" type, ie. a quadratic bézier curve, it will be rendered flat as it will only have a single group of parameters to draw a curve, which is not enough
+- if a command type `t|T` doesn't follow a command which has the same "parent" type, ie. a quadratic bézier curve, it will be rendered flat as it will only have its endpoint parameters, which is not enough to draw a curve
 
 Another fact is that a `s|S` command type is usable independently but `t|T` is not.
 
