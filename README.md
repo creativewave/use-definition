@@ -123,7 +123,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 - `NextIndex :: Number -> Number`
 - `TimingFunction :: String`
 - `TimingFunction :: Number -> Number`
-- `TimingFunction :: (Number, [Point, Point]) -> Point`
+- `TimingFunction :: (Number, [Group, Group]) -> Group`
 
 ##### Expected arguments:
 
@@ -131,12 +131,15 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `NextIndex` should be either an index `Number` of the next definition to transition to, or a function receiving the current index and returning the next index.
 
-`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a parameter from the initial definition and its corresponding parameter from the definition to transition to. The behavior of this function should vary depending on its parameters length:
+`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a [group of parameters](./src/definition/README.md#types-and-terminology) from the initial definition and its corresponding group from the definition to transition to. The behavior of this function should vary depending on its parameters length:
 
 - if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
-- otherwise, it should return the new parameter directly
+- otherwise, it should directly return the intermediate group of parameters
 
-For example, a linear timing function that receive parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }`, should return `0.75` when time is `0.75` when using time as its sole argument, or `{ x: 75, y: 75 }` when using the second argument.
+For example, when time is `0.75`, a linear timing function that receive a group of parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }` should return:
+
+- if it uses time as its sole argument: `0.75`
+- if it uses the second argument: `{ x: 75, y: 75 }`
 
 ##### Return value:
 
@@ -186,6 +189,7 @@ Medium to heavy motion design projects usually involve custom timing functions. 
 
 ## TODO
 
+- Fix: start animating from the intermediate definition when running an animation before the previous ends
 - Performances: measure performances of each processing task
 - Performances: use a transducer to parse, normalize, and configure each command/point of a path
 - Performances: consider rendering in a canvas
