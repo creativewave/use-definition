@@ -45,9 +45,9 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
     const MorphingPath = ({ definitions }) => {
 
-        const [definition, animateTo] = useDefinition({ definitions })
+        const [definition, animateTo, currentIndex] = useDefinition({ definitions })
         const handleClick = () => {
-            const { run, sequence } = animateTo(currentIndex => currentIndex === 1 ? 0 : 1)
+            const { run, sequence } = animateTo(currentIndex === 1 ? 0 : 1)
             run(sequence)
         }
 
