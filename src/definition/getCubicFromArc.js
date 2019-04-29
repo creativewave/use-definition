@@ -1,3 +1,6 @@
+
+import round from '../round'
+
 /**
  * Implementation based from SVGO (based from Snap.svg, based from the spec)
  * https://github.com/svg/svgo/blob/master/plugins/_path.js#L904
@@ -23,23 +26,6 @@ const _120 = Math.PI * 120 / 180
  */
 const rotateX = (x, y, phi) => (x * Math.cos(phi)) - (y * Math.sin(phi))
 const rotateY = (x, y, phi) => (x * Math.sin(phi)) + (y * Math.cos(phi))
-
-/**
- * round :: Number -> Number -> Number
- *
- * It should round numbers to the given precision if required, eg.:
- *
- *   round()(1)     -> 1
- *   round(1)(1)    -> 1
- *   round(1)(1.15) -> 1.2
- *
- * Memo: unary `+` operator coerces the `String` returned by `toFixed`.
- * Memo: this function exists to avoid false negative unit tests.
- *
- * TODO(refactoring): check how to run this operation only while running tests.
- * TODO(refactoring): extract into `./src/utils/round.js` or `src/round.js`.
- */
-const round = (precision = 0, n) => +n.toFixed(precision)
 
 /**
  * getCubicFromArc :: Group -> [ArcPoint] -> [...Point]

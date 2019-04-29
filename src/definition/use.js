@@ -1,10 +1,11 @@
 
-import animate, { End } from '../animation'
+import animate, { End, logEnd } from '../animation'
 
 import React from 'react'
 import normalize from './normalize'
 import parse from './parse'
 import { parse as parseTimingFunction } from '../timing'
+import round from '../round'
 import { serializeDefinition } from './serialize'
 import setAnimations from './animate'
 
@@ -19,8 +20,8 @@ import setAnimations from './animate'
  * the current relative `Time` of the animation, ie. a `Number` between 0 and 1.
  */
 const transitionTo = (time, [from, to], timingFunction) => ({
-    x: (from.x + ((to.x - from.x) * timingFunction(time))).toFixed(2),
-    y: (from.y + ((to.y - from.y) * timingFunction(time))).toFixed(2),
+    x: round(2, from.x + ((to.x - from.x) * timingFunction(time))),
+    y: round(2, from.y + ((to.y - from.y) * timingFunction(time))),
 })
 
 /**
@@ -49,8 +50,9 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
 
     const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
     const [currentIndex, setCurrentIndex] = React.useState(startIndex)
-    const [definition, setDefinition] = React.useState(serializeDefinition(defs[currentIndex]))
+    const [definition, setDefinition] = React.useState(defs[currentIndex])
     const animation = React.useRef()
+    const status = React.useRef()
 
     /**
      * animateTo :: NextIndex -> TimingFunction -> {
@@ -62,15 +64,15 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
      * TimingFunction :: (Number -> Number) | String
      *                :: (Number -> [Point] -> Number) | String
      */
-    const animateTo = React.useCallback((nextIndex, pointTimingFunction = 'easeOutCubic') => {
+    const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
-        const from = defs[currentIndex]
         const to = defs[nextIndex]
         const timingFunction = parseTimingFunction(pointTimingFunction)
         const timeFunction = time => {
 
             let hasRun = true
-            setDefinition(serializeDefinition(from.map(({ points, type }, commandIndex) => ({
+
+            setDefinition(definition.map(({ points, type }, commandIndex) => ({
                 points: points.map((point, pointIndex) => {
 
                     const { delay, duration } = to[commandIndex].points[pointIndex]
@@ -95,32 +97,28 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
                     return to[commandIndex].points[pointIndex]
                 }),
                 type,
-            }))))
+            })))
 
             // TODO: either return End.of() or ...? Frame.of()?
             return hasRun ? End.of('animation is over') : { hasRun: false }
         }
 
-        const sequence = animate(timeFunction)
-            .map(() => setCurrentIndex(nextIndex))
-            .orElse(error => {
+        return {
+            run(task) {
+                status.current === 'running' ? animation.current.cancel() : status.current = 'running'
+                animation.current = task.run()
                 setCurrentIndex(nextIndex)
-                /* eslint-disable no-console */
-                console.error('use-definition-hook: unexpected error while running the given timeFunction (see output below). Recovering back...')
-                console.error(error)
-                /* eslint-enable no-console */
-                return End.of(error)
-            })
-        const run = task => animation.current = task.run()
-
-        return { run, sequence }
-
-    }, [currentIndex, defs])
+            },
+            sequence: animate(timeFunction)
+                .map(() => status.current = 'end')
+                .orElse(logEnd('[use-definition-hook]: unexpected error while running the given timeFunction (see output below).')),
+        }
+    }
 
     // Cancel animation before component updates or unmounts
-    React.useEffect(() => () => animation.current && animation.current.cancel(), [animation])
+    React.useEffect(() => () => status.current === 'running' && animation.current.cancel(), [])
 
-    return [definition, animateTo, currentIndex]
+    return [serializeDefinition(definition), animateTo, currentIndex]
 }
 
 export default useDefinition

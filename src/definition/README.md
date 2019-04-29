@@ -63,7 +63,7 @@ Issue #14369: ([setState hook inside useEffect can cause unavoidable warning](ht
 
 Here, the cancellation state is handled in `Animation.Frame`, which will `run()` the animation and return a reference to a `TaskExecution` with a `cancel()` method. Whenever a component using this hook unmounts or the `currentIndex` of the `Definition` to render updates before the previous `TaskExecution` resolves, the latter has to be `cancel()`ed in order to prevent asynchronous `update`s, ie. `setDefinitinion` (while the animation is running) or `setCurrentIndex` (after the animation has run).
 
-It is done automatically by calling `TaskExecution.cancel()` in the cleanup function of `useEffet()`, using `currentIndex` and `definitions` as dependencies.
+It is done automatically by calling `TaskExecution.cancel()` in the cleanup function of `useEffet()`.
 
 (2) See also how it is done using `useRef` and a custom interface in [React Spring](https://github.com/react-spring/react-spring/blob/master/src/useSprings.js).
 

@@ -160,6 +160,13 @@ export class End extends Animation {
 }
 
 /**
+ * logEnd :: String -> Error -> End(Error)
+ */
+export const logEnd = message => error =>
+    // eslint-disable-next-line no-console
+    End.of(console.error(message, error) || error)
+
+/**
  * animate :: (Number -> Animation End(a) Frame) -> Frame
  */
 const animate = timingFunction => new Frame(timingFunction)
