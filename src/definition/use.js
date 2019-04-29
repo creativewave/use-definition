@@ -29,7 +29,7 @@ const transitionTo = (time, [from, to], timingFunction) => ({
  *   options?: Options,
  *   startIndex?: Number,  // Default to 0
  * }
- * -> [Definition, Function]
+ * -> [Definition, Function, Number]
  *
  * Definition => String
  * Options => {
@@ -40,8 +40,8 @@ const transitionTo = (time, [from, to], timingFunction) => ({
  * }
  *
  * It should return a normalized value of the `d`efinition attribute a `<path>`
- * given a collection of `Definition`, and a `Function` to animate a transition
- * into a next `Definition` index.
+ * given a collection of `Definition`, a `Function` to animate a transition into
+ * a next `Definition` index, and current index of the rendered `Definition`.
  *
  * Memo: implementation is explained in ./README.md.
  */
@@ -64,9 +64,8 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
      */
     const animateTo = React.useCallback((nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
-        const toIndex = typeof nextIndex === 'function' ? nextIndex(currentIndex) : nextIndex
         const from = defs[currentIndex]
-        const to = defs[toIndex]
+        const to = defs[nextIndex]
         const timingFunction = parseTimingFunction(pointTimingFunction)
         const timeFunction = time => {
 
@@ -103,9 +102,9 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
         }
 
         const sequence = animate(timeFunction)
-            .map(() => setCurrentIndex(toIndex))
+            .map(() => setCurrentIndex(nextIndex))
             .orElse(error => {
-                setCurrentIndex(toIndex)
+                setCurrentIndex(nextIndex)
                 /* eslint-disable no-console */
                 console.error('use-definition-hook: unexpected error while running the given timeFunction (see output below). Recovering back...')
                 console.error(error)
@@ -121,7 +120,7 @@ const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
     // Cancel animation before component updates or unmounts
     React.useEffect(() => () => animation.current && animation.current.cancel(), [animation])
 
-    return [definition, animateTo]
+    return [definition, animateTo, currentIndex]
 }
 
 export default useDefinition
