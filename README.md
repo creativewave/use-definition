@@ -78,7 +78,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`useDefinition :: { definitions: [Definition], options?: Options, startIndex?: Number } -> [Definition, Function, Number]`
+`useDefinition :: { definitions: [Definition], options?: Options } -> [Definition, Function, Number]`
 
 #### Arguments
 
@@ -90,20 +90,16 @@ All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`,
 
 ##### `options` (optional)
 
-Default: `{ minDelay: 0, maxDelay: 1000, minDuration: 3000, maxDuration: 5000 }`
+Default: `{ minDelay: 0, maxDelay: 1000, minDuration: 3000, maxDuration: 5000, startIndex: 0 }`
 
-`options` can be set to configure the animation of a point:
+`options` can be used to configure the first definition to render from the giving collection of `definitions`, using `startIndex`, or to configure the animation of a point:
 
 - `minDelay`, `maxDelay`: minimum and maximum delay in ms before starting the animation
 - `minDuration`, `maxDuration`: minimum and maximum duration in ms of an animation
 
 Each point will receive random values between the given minimum and maximum of the corresponding option, and will apply them to its parameters. Points with the same parameters values will also have the same option values applied.
 
-##### `startIndex` (optional)
-
-Default: `0`
-
-`startIndex` can be used to configure the first definition to render using its index in the giving collection of `definitions`.
+`delay` and/or `duration` can be used to opt-out from using random values.
 
 #### Return values
 
