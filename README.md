@@ -78,7 +78,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`useDefinition :: { definitions: [Definition], options?: Options, startIndex?: Number } -> [Definition, Function]`
+`useDefinition :: { definitions: [Definition], options?: Options, startIndex?: Number } -> [Definition, Function, Number]`
 
 #### Arguments
 
@@ -129,7 +129,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'easeOutCubic'`.
 
-`NextIndex` should be either an index `Number` of the next definition to transition to, or a function receiving the current index and returning the next index.
+`NextIndex` should be the index `Number` of the next definition to transition to.
 
 `TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a [group of parameters](./src/definition/README.md#types-and-terminology) from the initial definition and its corresponding group from the definition to transition to. The behavior of this function should vary depending on its parameters length:
 
@@ -178,6 +178,12 @@ Running a parrallel computation (not implemented yet):
             .map(() => console.log('transition to index 2: done'))
     run(sequence)
 ```
+
+##### `currentIndex`
+
+The last value from the collection of values returned by this hook is the index `Number` corresponding to the definition that is currently rendered.
+
+**Note:** `currentIndex` will be immediately updated after executing `run(sequence)`.
 
 ### `timing`
 
