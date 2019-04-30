@@ -188,7 +188,6 @@ Medium to heavy motion design projects usually involve custom timing functions. 
 
 ## TODO
 
-- Fix: start animating from the intermediate definition when running an animation before the previous ends
 - Performances: measure performances of each processing task
 - Performances: use a transducer to parse, normalize, and configure each command/point of a path
 - Performances: consider rendering in a canvas
