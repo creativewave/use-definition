@@ -6,10 +6,12 @@ import random from 'lodash/fp/random'
  * getGroupOptions :: String -> Options -> GroupOptions
  *
  * Options => {
- *   minDelay: Number,
- *   minDuration: Number,
- *   maxDelay: Number,
- *   maxDuration: Number,
+ *   delay?: Number,
+ *   duration?: Number,
+ *   minDelay?: Number,
+ *   minDuration?: Number,
+ *   maxDelay?: Number,
+ *   maxDuration?: Number,
  * }
  * GroupOptions => {
  *   delay: Number,
@@ -20,8 +22,8 @@ import random from 'lodash/fp/random'
  * the same `GroupOptions` when given the same parameters.
  */
 const getGroupOptions = memoize((group, options) => ({
-    delay: random(options.minDelay, options.maxDelay),
-    duration: random(options.minDuration, options.maxDuration),
+    delay: options.delay || random(options.minDelay, options.maxDelay),
+    duration: options.duration || random(options.minDuration, options.maxDuration),
 }))
 
 /**
@@ -86,7 +88,6 @@ export const setAnimation = options => ([startCommand, drawCommand, endCommand])
  *   maxDuration: Number,
  * }
  */
-const setAnimations = (definitions, { maxDelay = 1000, maxDuration = 5000, minDelay = 0, minDuration = 3000 }) =>
-    definitions.map(setAnimation({ maxDelay, maxDuration, minDelay, minDuration }))
+const setAnimations = (definitions, options) => definitions.map(setAnimation(options))
 
 export default setAnimations

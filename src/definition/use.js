@@ -24,20 +24,31 @@ const transitionTo = (time, [from, to], timingFunction) => ({
     y: round(2, from.y + ((to.y - from.y) * timingFunction(time))),
 })
 
+const defaultOptions = {
+    maxDelay: 1000,
+    maxDuration: 5000,
+    minDelay: 0,
+    minDuration: 3000,
+    startIndex: 0,
+}
+
 /**
  * useDefinition :: {
  *   definitions: [Definition],
  *   options?: Options,
- *   startIndex?: Number,  // Default to 0
+ *   startIndex?: Number, // Default to 0
  * }
  * -> [Definition, Function, Number]
  *
  * Definition => String
  * Options => {
- *   minDelay?: Number,    // Default to 0
- *   minDuration?: Number, // Default to 3000
- *   maxDelay?: Number,    // Default to 1000
- *   maxDuration?: Number, // Default to 5000
+ *   delay?: Number,
+ *   duration?: Number,
+ *   minDelay?: Number,   // Default to 0
+ *   minDuration?: Number,// Default to 3000
+ *   maxDelay?: Number,   // Default to 1000
+ *   maxDuration?: Number,// Default to 5000
+ *   startIndex?: Number, // Default to 0
  * }
  *
  * It should return a normalized value of the `d`efinition attribute a `<path>`
@@ -46,8 +57,9 @@ const transitionTo = (time, [from, to], timingFunction) => ({
  *
  * Memo: implementation is explained in ./README.md.
  */
-const useDefinition = ({ definitions, options = {}, startIndex = 0 }) => {
+const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
+    const { startIndex, ...options } = { ...defaultOptions, userOptions }
     const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
     const [currentIndex, setCurrentIndex] = React.useState(startIndex)
     const [definition, setDefinition] = React.useState(defs[currentIndex])
