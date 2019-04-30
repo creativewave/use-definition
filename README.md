@@ -150,33 +150,30 @@ For example, when time is `0.75`, a linear timing function that receive a group 
 
 The latter is a dirty trick to automatically cancel the animation when the component has its definition animated while it is either updated or unmounted.
 
-**Using Folktale Task's interface**
+**Using Folktale's Task interface**
 
 Executing a callback after an animation ends:
 
 ```js
-    const { run, sequence } = animateTo(2).map(() => console.log('transition to index 2: done'))
-    run(sequence)
+    const { run, sequence } = animateTo(2)
+    run(sequence.map(() => console.log('transition to index 2: done')))
 ```
 
 Chaining multiple animation:
 
 ```js
-    const { run, sequence } =
-        animateTo(2)
-            .map(() => console.log('transition to index 2: done'))
-            .chain(animateTo(3).map(() => console.log('transition to index 3: done')))
-            .map(() => console.log('all transitions: done'))
-    run(sequence)
+    const { run, sequence } = animateTo(2)
+    run(sequence
+        .map(() => console.log('transition to index 2: done'))
+        .chain(() => animateTo(3).sequence.map(() => console.log('transition to index 2: done')))
+        .map(() => console.log('all transitions: done')))
 ```
 
 Running a parrallel computation (not implemented yet):
 
 ```js
-    const { run, sequence } =
-        animateTo(2).and(End(console.log('transition to index 2: starting')))
-            .map(() => console.log('transition to index 2: done'))
-    run(sequence)
+    const { run, sequence } = animateTo(2)
+    run(sequence.and(new Frame(timeFunction)).map(() => console.log('all animations: done'))
 ```
 
 ##### `currentIndex`
