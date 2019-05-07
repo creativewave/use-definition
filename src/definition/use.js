@@ -122,7 +122,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
             },
             sequence: animate(timeFunction)
                 .map(() => status.current = 'end')
-                .orElse(logEnd('[use-definition-hook]: unexpected error while running the given timeFunction (see output below).')),
+                .orElse(logEnd('[use-definition-hook]: error while running animation.')),
         }
     }
 
