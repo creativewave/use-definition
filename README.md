@@ -115,9 +115,8 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Frame -> TaskExecution }`
 
-- `NextIndex :: Number`
-- `NextIndex :: Number -> Number`
-- `TimingFunction :: String`
+- `NextIndex => Number`
+- `TimingFunction => String`
 - `TimingFunction :: Number -> Number`
 - `TimingFunction :: (Number, [Group, Group]) -> Group`
 
