@@ -36,7 +36,6 @@ const defaultOptions = {
  * useDefinition :: {
  *   definitions: [Definition],
  *   options?: Options,
- *   startIndex?: Number, // Default to 0
  * }
  * -> [Definition, Function, Number]
  *
