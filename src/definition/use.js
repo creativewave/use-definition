@@ -59,7 +59,7 @@ const defaultOptions = {
  */
 const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
-    const { startIndex, ...options } = { ...defaultOptions, userOptions }
+    const { startIndex, ...options } = { ...defaultOptions, ...userOptions }
     const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
     const [currentIndex, setCurrentIndex] = React.useState(startIndex)
     const [definition, setDefinition] = React.useState(defs[currentIndex])
