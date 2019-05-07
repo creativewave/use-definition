@@ -50,7 +50,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
     /**
      * animateTo :: NextIndex -> TimingFunction -> {
-     *   sequence: Frame,
+     *   sequence: Task,
      *   run: Frame -> TaskExecution,
      * }
      *

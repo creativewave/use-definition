@@ -140,7 +140,7 @@ For example, when time is `0.75`, a linear timing function that receive a group 
 
 `animateTo` will return an object with the following properties:
 
-- `sequence`: a `Frame` object wrapping a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) internally, that can be used to chain consecutive(s) animation(s)
+- `sequence`: a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) that can be used to chain consecutive(s) animation(s)
 - `run`: a function to run the sequence of animation(s)
 
 The latter is a dirty trick to automatically cancel the animation when the component has its definition animated while it is either updated or unmounted.
@@ -168,7 +168,7 @@ Running a parrallel computation (not implemented yet):
 
 ```js
     const { run, sequence } = animateTo(2)
-    run(sequence.and(new Frame(timeFunction)).map(() => console.log('all animations: done'))
+    run(sequence.and(Task.of('transition to index 2: started'))
 ```
 
 ##### `currentIndex`
