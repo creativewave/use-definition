@@ -21,9 +21,9 @@ import random from 'lodash/fp/random'
  * Memo: the end position parameters of a `Group` is used to memoize and return
  * the same `GroupOptions` when given the same parameters.
  */
-const getGroupOptions = memoize((group, options) => ({
-    delay: options.delay || random(options.minDelay, options.maxDelay),
-    duration: options.duration || random(options.minDuration, options.maxDuration),
+const getGroupOptions = memoize((group, { delay, duration, maxDelay, maxDuration, minDelay, minDuration }) => ({
+    delay: typeof delay === 'undefined' ? random(minDelay, maxDelay) : delay,
+    duration: typeof duration === 'undefined' ? random(minDuration, maxDuration) : duration,
 }))
 
 /**
