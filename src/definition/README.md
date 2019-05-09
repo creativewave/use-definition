@@ -5,6 +5,20 @@
 
 # Implementation of `useDefinition`
 
+**Why updating the current definition's index immediately after its animation starts, rather than waiting for its end?**
+
+This is easiest way to handle a sequence of chained animations that are using the current definition's index to select the next index of the definition to transition to. Otherwise, they would all be animated from the same initial definition that is set before the sequence run.
+
+Thus, the event callback that triggers the sequence should handle a new event when the previous animation is not over, eg.:
+
+```js
+    if (animation.current.isRunning) return
+    const { run, sequence } = animateTo(1)
+    run(sequence.chain(() => animateTo(2).sequence))
+```
+
+As it would be more accurate to wait for the end of an animation before updating the current index, this behavior could change in a future version.
+
 **Why using `useState` to *save* a definition then *write* it as a definition attribute of an SVG `<path>`, instead of using `useRef` and *writing* it directly with `setAttributeNS()`?**
 
 `useEffect`, `useState` and `requestAnimationFrame` make it cheap and easy to render an animation without blocking rendering or user interactions. Using `Definition` from state also allow this:

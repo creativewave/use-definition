@@ -45,7 +45,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
     const MorphingPath = ({ definitions }) => {
 
-        const [definition, animateTo, currentIndex] = useDefinition({ definitions })
+        const [definition, animateTo, animation] = useDefinition({ definitions })
         const handleClick = () => {
             const { run, sequence } = animateTo('next')
             run(sequence)
@@ -78,7 +78,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`useDefinition :: { definitions: [Definition], options?: Options } -> [Definition, Function, Number]`
+`useDefinition :: { definitions: [Definition], options?: Options } -> [Definition, Function, Reference]`
 
 #### Arguments
 
@@ -158,28 +158,39 @@ Executing a callback after an animation ends:
     run(sequence.map(() => console.log('transition to index 2: done')))
 ```
 
-Chaining multiple animation:
+Running a parrallel task:
 
 ```js
     const { run, sequence } = animateTo(2)
+    run(sequence.and(Task.of('transition to index 2: started')))
+```
+
+Chaining animations:
+
+```js
+    const { run, sequence } = animateTo(2)
+    const log = newIndex => console.log(`transition to ${newIndex}: done`)
     run(sequence
-        .map(() => console.log('transition to index 2: done'))
-        .chain(() => animateTo(3).sequence.map(() => console.log('transition to index 2: done')))
-        .map(() => console.log('all transitions: done')))
+        .map(log)
+        .chain(() => animateTo(3).sequence)
+        .map(log))
 ```
 
-Running a parrallel computation (not implemented yet):
+##### `animation`
 
-```js
-    const { run, sequence } = animateTo(2)
-    run(sequence.and(Task.of('transition to index 2: started'))
-```
+The React `Reference` returned by `useDefinition` can be named `animation` and has the following type:
 
-##### `currentIndex`
+`Reference => { current: { index: Number, isRunning?: Boolean, task?: TaskExecution }}`
 
-The last value from the collection of values returned by this hook is the index `Number` corresponding to the definition that is currently rendered.
+- `index` is the current index of the definition that is currently rendered
+- `isRunning` is `true` when an animation is running, otherwise `false`
+- `task` is a reference to the current `TaskExecution` that is either pending or completed
 
-**Note:** `currentIndex` will be immediately updated after executing `run(sequence)`.
+**Note:** `index` will be immediately updated after executing `run(sequence)`.
+
+`isRunning` could be used to prevent starting a new animation if the previous one is not over, for example.
+
+`task` could be used to cancel the animation, eg. if a *pause* event has been fired.
 
 ### `timing`
 

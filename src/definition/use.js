@@ -18,11 +18,8 @@ const defaultOptions = {
 }
 
 /**
- * useDefinition :: {
- *   definitions: [Definition],
- *   options?: Options,
- * }
- * -> [Definition, Function, Number]
+ * useDefinition :: { definitions: [Definition], options?: Options }
+ *               -> [Definition, Function, Reference]
  *
  * Definition => String
  * Options => {
@@ -35,10 +32,12 @@ const defaultOptions = {
  *   precision?: Number,
  *   startIndex?: Number,
  * }
+ * Reference => { current: { index: Number, isRunning: Boolean, task: TaskExecution } }
  *
- * It should return a normalized value of the `d`efinition attribute a `<path>`
- * given a collection of `Definition`, a `Function` to animate a transition into
- * a next `Definition` index, and current index of the rendered `Definition`.
+ * Given a collection of `Definition`, it should return:
+ * - a normalized `d`efinition
+ * - a `Function` to animate a transition into a next `Definition` index
+ * - the index of the `Definition` that is currently rendered
  *
  * Memo: implementation is explained in ./README.md.
  */
@@ -56,6 +55,11 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
      * TimingFunction => String
      * TimingFunction :: (Number -> Number)
      * TimingFunction :: (Number -> [Group, Group] -> Number)
+     *
+     * Memo: the task is returned then received back and run here, in order to
+     * automatically cancel it when component unmounts.
+     *
+     * Memo: the scoped `definition` will be stale right after animation starts.
      */
     const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
