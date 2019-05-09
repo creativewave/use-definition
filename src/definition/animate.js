@@ -21,9 +21,9 @@ export const logReject = message => error =>
  * It should return an intermediate `Group` between `From` and `To` relative to
  * the current relative `Time` of the animation, ie. a `Number` between 0 and 1.
  */
-export const transitionTo = (time, [from, to], timingFunction) => ({
-    x: round(2, from.x + ((to.x - from.x) * timingFunction(time))),
-    y: round(2, from.y + ((to.y - from.y) * timingFunction(time))),
+export const transitionTo = (time, [from, to], timingFunction, precision) => ({
+    x: round(precision, from.x + ((to.x - from.x) * timingFunction(time))),
+    y: round(precision, from.y + ((to.y - from.y) * timingFunction(time))),
 })
 
 /**
@@ -92,10 +92,12 @@ export const animate = timeFunction => task(resolver => {
  * Memo: the end position parameters of a `Group` is used to memoize and return
  * the same `GroupOptions` when given the same parameters.
  */
-const getGroupOptions = memoize((group, { delay, duration, maxDelay, maxDuration, minDelay, minDuration }) => ({
-    delay: typeof delay === 'undefined' ? random(minDelay, maxDelay) : delay,
-    duration: typeof duration === 'undefined' ? random(minDuration, maxDuration) : duration,
-}))
+const getGroupOptions = memoize(
+    (group, { delay, duration, maxDelay, maxDuration, minDelay, minDuration }) => ({
+        delay: typeof delay === 'undefined' ? random(minDelay, maxDelay) : delay,
+        duration: typeof duration === 'undefined' ? random(minDuration, maxDuration) : duration,
+    }),
+    (group, { precision }) => `${round(precision, group.x)}${round(precision, group.y)}`)
 
 /**
  * setAnimation :: Options -> Definition -> Definition
@@ -121,13 +123,7 @@ const getGroupOptions = memoize((group, { delay, duration, maxDelay, maxDuration
  * TODO(refactoring): transfom it into a transducer function.
  */
 export const setAnimation = options => ([startCommand, drawCommand, endCommand]) => [
-    {
-        ...startCommand,
-        points: [{
-            ...startCommand.points[0],
-            ...getGroupOptions(`${startCommand.points[0].x}${startCommand.points[0].y}`, options),
-        }],
-    },
+    { ...startCommand, points: [{ ...startCommand.points[0], ...getGroupOptions(startCommand.points[0], options) }] },
     {
         ...drawCommand,
         points: drawCommand.points.map((point, index) => {
@@ -143,7 +139,7 @@ export const setAnimation = options => ([startCommand, drawCommand, endCommand])
                     positionPoint = point
                     break
             }
-            return { ...point, ...getGroupOptions(`${positionPoint.x}${positionPoint.y}`, options) }
+            return { ...point, ...getGroupOptions(positionPoint, options) }
         }),
     },
     endCommand,

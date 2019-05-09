@@ -12,6 +12,7 @@ const defaultOptions = {
     maxDuration: 5000,
     minDelay: 0,
     minDuration: 3000,
+    precision: 2,
     startIndex: 0,
 }
 
@@ -83,7 +84,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
                     if (hasFrame) {
                         const relativeTime = (time - delay) / duration
                         if (timingFunction.length === 1) {
-                            return transitionTo(relativeTime, [point, to[commandIndex].points[pointIndex]], timingFunction)
+                            return transitionTo(relativeTime, [point, to[commandIndex].points[pointIndex]], timingFunction, options.precision)
                         }
                         return timingFunction(relativeTime, [point, to[commandIndex].points[pointIndex]])
                     }
