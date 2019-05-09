@@ -47,7 +47,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
         const [definition, animateTo, currentIndex] = useDefinition({ definitions })
         const handleClick = () => {
-            const { run, sequence } = animateTo(currentIndex === 1 ? 0 : 1)
+            const { run, sequence } = animateTo('next')
             run(sequence)
         }
 
@@ -119,7 +119,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Frame -> TaskExecution }`
 
-- `NextIndex => Number`
+- `NextIndex => Number|String`
 - `TimingFunction => String`
 - `TimingFunction :: Number -> Number`
 - `TimingFunction :: (Number, [Group, Group]) -> Group`
@@ -128,7 +128,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'easeOutCubic'`.
 
-`NextIndex` should be the index `Number` of the next definition to transition to.
+`NextIndex` should be the index `Number` of the definition to transition to, or a convenient `'next'` alias of the next definition index.
 
 `TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a [group of parameters](./src/definition/README.md#types-and-terminology) from the initial definition and its corresponding group from the definition to transition to. The behavior of this function should vary depending on its parameters length:
 

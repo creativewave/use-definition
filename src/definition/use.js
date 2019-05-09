@@ -51,14 +51,12 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
     const status = React.useRef()
 
     /**
-     * animateTo :: NextIndex -> TimingFunction -> {
-     *   sequence: Task,
-     *   run: Frame -> TaskExecution,
-     * }
+     * animateTo :: NextIndex -> TimingFunction -> { sequence: Task, run: Frame -> TaskExecution }
      *
-     * NextIndex :: (Number -> Number) | Number
-     * TimingFunction :: (Number -> Number) | String
-     *                :: (Number -> [Point] -> Number) | String
+     * NextIndex => Number|String
+     * TimingFunction => String
+     * TimingFunction :: (Number -> Number)
+     * TimingFunction :: (Number -> [Group, Group] -> Number)
      */
     const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
