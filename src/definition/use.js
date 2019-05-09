@@ -2,6 +2,7 @@
 import setAnimations, { animate, logReject, transitionTo } from './animate'
 
 import React from 'react'
+import Task from 'folktale/concurrency/task'
 import normalize from './normalize'
 import parse from './parse'
 import { parse as parseTimingFunction } from '../timing'
@@ -45,10 +46,8 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
     const { startIndex, ...options } = { ...defaultOptions, ...userOptions }
     const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
-    const [currentIndex, setCurrentIndex] = React.useState(startIndex)
-    const [definition, setDefinition] = React.useState(defs[currentIndex])
-    const animation = React.useRef()
-    const status = React.useRef()
+    const [definition, setDefinition] = React.useState(defs[startIndex])
+    const animation = React.useRef({ index: startIndex })
 
     /**
      * animateTo :: NextIndex -> TimingFunction -> { sequence: Task, run: Frame -> TaskExecution }
@@ -60,6 +59,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
      */
     const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
+        const from = animation.current.isRunning ? definition : defs[animation.current.index]
         const next = typeof nextIndex === 'string'
             ? animation.current.index === defs.length - 1 ? 0 : animation.current.index + 1
             : nextIndex
@@ -69,29 +69,29 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
             let hasRun = true
 
-            setDefinition(definition.map(({ points, type }, commandIndex) => ({
-                points: points.map((point, pointIndex) => {
+            setDefinition(from.map(({ points, type }, commandIndex) => ({
+                points: points.map((group, groupIndex) => {
 
-                    const { delay, duration } = to[commandIndex].points[pointIndex]
+                    const { delay, duration } = to[commandIndex].points[groupIndex]
                     const hasStarted = time > delay
                     const hasFrame = hasStarted && time < duration + delay
 
                     hasRun = hasRun && ((time - delay) >= duration)
 
-                    // Return initial point
+                    // Return initial group
                     if (!hasStarted) {
-                        return point
+                        return group
                     }
-                    // Return intermediate point
+                    // Return intermediate group
                     if (hasFrame) {
                         const relativeTime = (time - delay) / duration
                         if (timingFunction.length === 1) {
-                            return transitionTo(relativeTime, [point, to[commandIndex].points[pointIndex]], timingFunction, options.precision)
+                            return transitionTo(relativeTime, [group, to[commandIndex].points[groupIndex]], timingFunction, options.precision)
                         }
-                        return timingFunction(relativeTime, [point, to[commandIndex].points[pointIndex]])
+                        return timingFunction(relativeTime, [group, to[commandIndex].points[groupIndex]])
                     }
-                    // Return final point
-                    return to[commandIndex].points[pointIndex]
+                    // Return final group
+                    return to[commandIndex].points[groupIndex]
                 }),
                 type,
             })))
@@ -101,20 +101,26 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
         return {
             run(task) {
-                status.current === 'running' ? animation.current.cancel() : status.current = 'running'
-                animation.current = task.run()
-                setCurrentIndex(next)
+                if (animation.current.isRunning) animation.current.task.cancel()
+                animation.current.task = task.run()
             },
             sequence: animate(timeFunction)
-                .map(() => status.current = 'end')
+                .and(Task.of().map(() => {
+                    animation.current.isRunning = true
+                    animation.current.index = next
+                }))
+                .map(() => {
+                    animation.current.isRunning = false
+                    return next
+                })
                 .orElse(logReject('[use-definition-hook]: error while running animation.')),
         }
     }
 
-    // Cancel animation before component updates or unmounts
-    React.useEffect(() => () => status.current === 'running' && animation.current.cancel(), [])
+    // Cancel animation before component unmounts
+    React.useEffect(() => () => animation.current.isRunning && animation.current.task.cancel(), [])
 
-    return [serializeDefinition(definition), animateTo, currentIndex]
+    return [serializeDefinition(definition), animateTo, animation]
 }
 
 export default useDefinition
