@@ -1,6 +1,77 @@
 
-import memoize from 'lodash/fp/memoize'
+import { rejected, task } from 'folktale/concurrency/task'
+
+import memoize from 'lodash/memoize'
 import random from 'lodash/fp/random'
+import round from '../round'
+
+/**
+ * logReject :: String -> Error -> Task Error
+ */
+export const logReject = message => error =>
+    rejected(console.error(message, error) || error) // eslint-disable-line no-console
+
+/**
+ * transitionTo :: Time -> [From, To] -> (Time -> Number) -> Group
+ *
+ * Time => Number
+ * From, To => Group
+ * Group => { [Parameter]: Number }
+ *
+ * It should return an intermediate `Group` between `From` and `To` relative to
+ * the current relative `Time` of the animation, ie. a `Number` between 0 and 1.
+ */
+export const transitionTo = (time, [from, to], timingFunction) => ({
+    x: round(2, from.x + ((to.x - from.x) * timingFunction(time))),
+    y: round(2, from.y + ((to.y - from.y) * timingFunction(time))),
+})
+
+/**
+ * animate :: Number -> Protocol -> Task Error Protocol
+ *
+ * Protocol => { hasRun: Boolean }
+ *
+ * `animate` abstracts running an animation, ie. calling the same function with
+ * a time value as argument over and over until the animation is done, using a
+ * Folktale `Task`, which is close to monad types such as `Promise` or `Stream`,
+ * and also to coproduct functors such as `Either`, and which give control on
+ * the execution of the animation.
+ *
+ * It also abstracts using `requestAnimationFrame` and `cancelAnimationFrame`,
+ * and handling a time variable.
+ *
+ * Note: `Protocol` can be used as a free data transport between sequences.
+ */
+export const animate = timeFunction => task(resolver => {
+
+    let startTime = 0
+    let timerId
+
+    const run = timestamp => {
+
+        if (startTime === 0) {
+            startTime = timestamp
+        }
+        const time = timestamp - startTime
+
+        let animation
+
+        if (resolver.isCancelled) {
+            return
+        }
+        try {
+            animation = timeFunction(time)
+        } catch (error) {
+            return resolver.reject(error)
+        }
+        if (animation.hasRun) {
+            return resolver.resolve(animation)
+        }
+        timerId = requestAnimationFrame(run)
+    }
+    timerId = requestAnimationFrame(run)
+    resolver.onCancelled(() => cancelAnimationFrame(timerId))
+})
 
 /**
  * getGroupOptions :: String -> Options -> GroupOptions

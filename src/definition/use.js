@@ -1,28 +1,11 @@
 
-import animate, { End, logEnd } from '../animation'
+import setAnimations, { animate, logReject, transitionTo } from './animate'
 
 import React from 'react'
 import normalize from './normalize'
 import parse from './parse'
 import { parse as parseTimingFunction } from '../timing'
-import round from '../round'
 import { serializeDefinition } from './serialize'
-import setAnimations from './animate'
-
-/**
- * transitionTo :: Time -> [From, To] -> (Time -> Number) -> Group
- *
- * Time => Number
- * From, To => Group
- * Group => { [Parameter]: Number }
- *
- * It should return an intermediate `Group` between `From` and `To` relative to
- * the current relative `Time` of the animation, ie. a `Number` between 0 and 1.
- */
-const transitionTo = (time, [from, to], timingFunction) => ({
-    x: round(2, from.x + ((to.x - from.x) * timingFunction(time))),
-    y: round(2, from.y + ((to.y - from.y) * timingFunction(time))),
-})
 
 const defaultOptions = {
     maxDelay: 1000,
@@ -110,8 +93,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
                 type,
             })))
 
-            // TODO: either return End.of() or ...? Frame.of()?
-            return hasRun ? End.of('animation is over') : { hasRun: false }
+            return hasRun ? { hasRun: true } : { hasRun: false }
         }
 
         return {
@@ -122,7 +104,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
             },
             sequence: animate(timeFunction)
                 .map(() => status.current = 'end')
-                .orElse(logEnd('[use-definition-hook]: error while running animation.')),
+                .orElse(logReject('[use-definition-hook]: error while running animation.')),
         }
     }
 
