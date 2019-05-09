@@ -90,14 +90,18 @@ All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`,
 
 ##### `options` (optional)
 
-Default: `{ minDelay: 0, maxDelay: 1000, minDuration: 3000, maxDuration: 5000, startIndex: 0 }`
+| **Options** | **Description**                                               | **Default** |
+| ----------- | ------------------------------------------------------------- | ------- |
+| delay       | Delay (in ms) to wait before animating all points.            | -       |
+| duration    | Duration (in ms) to animate all points.                       | -       |
+| minDelay    | Random minimum delay (not processed if `delay` is set).       | `0`     |
+| maxDelay    | Random maximum delay (not processed if `delay` is set).       | `1000`  |
+| minDuration | Random minimum duration (not processed if `duration` is set). | `3000`  |
+| maxDuration | Random maximum duration (not processed if `duration` is set). | `5000`  |
+| precision   | Rounding precision.                                           | `2`     |
+| startIndex  | Index of the first definition to render.                      | `0`     |
 
-`options` can be used to configure the first definition to render from the giving collection of `definitions`, using `startIndex`, or to configure the animation of a point:
-
-- `minDelay`, `maxDelay`: minimum and maximum delay in ms before starting the animation
-- `minDuration`, `maxDuration`: minimum and maximum duration in ms of an animation
-
-Each point will receive random values between the given minimum and maximum of the corresponding option, and will apply them to its parameters. Points with the same parameters values will also have the same option values applied.
+When using `min` or `max` options, each point will receive random values between the given minimum and maximum of the corresponding option. Points at the same position will receive the same option values.
 
 `delay` and/or `duration` can be used to opt-out from using random values.
 

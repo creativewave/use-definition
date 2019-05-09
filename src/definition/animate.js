@@ -83,6 +83,7 @@ export const animate = timeFunction => task(resolver => {
  *   minDuration?: Number,
  *   maxDelay?: Number,
  *   maxDuration?: Number,
+ *   precision: Number,
  * }
  * GroupOptions => {
  *   delay: Number,
@@ -107,6 +108,7 @@ const getGroupOptions = memoize(
  *   minDuration: Number,
  *   maxDelay: Number,
  *   maxDuration: Number,
+ *   precision: Number,
  * }
  * Definition => [Command]
  * Command => { type: String, points: [...Point] }

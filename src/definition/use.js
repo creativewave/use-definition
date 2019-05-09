@@ -27,11 +27,12 @@ const defaultOptions = {
  * Options => {
  *   delay?: Number,
  *   duration?: Number,
- *   minDelay?: Number,   // Default to 0
- *   minDuration?: Number,// Default to 3000
- *   maxDelay?: Number,   // Default to 1000
- *   maxDuration?: Number,// Default to 5000
- *   startIndex?: Number, // Default to 0
+ *   minDelay?: Number,
+ *   minDuration?: Number,
+ *   maxDelay?: Number,
+ *   maxDuration?: Number,
+ *   precision?: Number,
+ *   startIndex?: Number,
  * }
  *
  * It should return a normalized value of the `d`efinition attribute a `<path>`
