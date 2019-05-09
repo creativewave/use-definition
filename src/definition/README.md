@@ -13,7 +13,9 @@
     const higherOrderDefinition = ({ definition }) => `M0 0, H 100, V 100, H 0, z ${definition}`
 ```
 
-While adding a frame (this is what the above code does) to a path is not very usefull, some use cases involving SVG `<mask>`s or `<clipPath>`s require this flexibility. Implementing this feature using `setAttributeNS()` would imply receiving a string to append and/or prepend, or inverting control to call a function that would return a transformed `Definition` to use in `setAttributeNS()`.
+While adding a frame to a path is not super usefull (this is what `M0 0, H 100, V 100, H 0, z` does), some use cases including SVG `<mask>`s or `<clipPath>`s require this flexibility. Implementing this feature using `setAttributeNS()` would imply to receive a string to append and/or prepend, or to invert control by calling a given function that would return the (transformed) `Definition` to use in `setAttributeNS()`.
+
+While using `<use>`s should be favoured, some (rare) cases also require to set the same definition for multiple `<path>`s. Using a single state value avoids using a reference for each `<path>`.
 
 **How to cancel an animation before a component updates or unmounts?**
 

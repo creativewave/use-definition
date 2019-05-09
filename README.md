@@ -183,7 +183,7 @@ The last value from the collection of values returned by this hook is the index 
 
 **Visualisations:** [CodePen](https://codepen.io/creative-wave/pen/vMrXJa).
 
-Medium to heavy motion design projects usually involve custom timing functions. This collection is only meant for demonstration purpose. Replacing CSS with JavaScript to transition between two paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
+Medium to heavy motion design projects usually involve custom timing functions. This collection is only meant for demonstration purpose. Replacing CSS with JavaScript to transition between paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
 
 ## TODO
 
