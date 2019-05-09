@@ -62,7 +62,10 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
      */
     const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
 
-        const to = defs[nextIndex]
+        const next = typeof nextIndex === 'string'
+            ? animation.current.index === defs.length - 1 ? 0 : animation.current.index + 1
+            : nextIndex
+        const to = defs[next]
         const timingFunction = parseTimingFunction(pointTimingFunction)
         const timeFunction = time => {
 
@@ -102,7 +105,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
             run(task) {
                 status.current === 'running' ? animation.current.cancel() : status.current = 'running'
                 animation.current = task.run()
-                setCurrentIndex(nextIndex)
+                setCurrentIndex(next)
             },
             sequence: animate(timeFunction)
                 .map(() => status.current = 'end')
