@@ -142,7 +142,7 @@ It will be automatically updated while transitionning to another definition.
 
 The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
-`animateTo :: (Number|String, Options?) -> { sequence: Frame, run: Task -> TaskExecution }`
+`animateTo :: (Number|String, Options?) -> { sequence: Task, run: Task -> TaskExecution }`
 
 The first argument should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
 
