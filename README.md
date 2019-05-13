@@ -11,11 +11,11 @@
 
 `use-definition` abstracts animating the `d`efinition attribute of an SVG `<path>` in a React component.
 
-It receives a collection of definitions, and returns a normalized value to render and a function to trigger a transition to another definition from the given collection.
+It receives a collection of definitions, and returns a normalized value to render and a function to trigger a transition to another (normalized) definition from the given collection.
 
 **Demo:** [CodePen](https://codepen.io/creative-wave/pen/QPxLXm).
 
-Features:
+**Features:**
 
 - [x] support of any command type in the definition
 - [x] transformation between `<path>`s with different numbers of points
@@ -24,9 +24,9 @@ Features:
 - [ ] render in a `<canvas>`
 - [ ] render in a static CSS file as CSS keyframes
 
-This package has been created to overcome the limitations of the existing SVG animation libraries for this specific need. It's an alternative to [GreenSock morphSVG plugin](https://greensock.com/morphSVG), which is not free and "React plug and play ready", but has some extra features, probably a better support for old browsers, and higher performances.
+This package has been created to overcome the limitations of the existing SVG animation libraries for this specific need. It's an alternative to [GreenSock morphSVG plugin](https://greensock.com/morphSVG), which is not free and "React plug and play ready", but has some extra features, probably a better browsers support, and higher performances.
 
-This package has no external dependency like [SVGO](https://github.com/svg/svgo) to parse or normalize definitions, in order to avoid extra iterations on each definition and optimize performances.
+This package has no external dependency like [SVGO](https://github.com/svg/svgo) to parse or normalize definitions, in order to avoid extra iterations on each definition and to optimize performances.
 
 ## Installation
 
@@ -34,7 +34,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
   npm i @cdoublev/use-definition
 ```
 
-**Note on browsers support:** this package doesn't include a polyfill of `requestAnimationFrame`, which is required for IE < 10. You should [include it](https://gist.github.com/paulirish/1579671) [yourself](https://hackernoon.com/polyfills-everything-you-ever-wanted-to-know-or-maybe-a-bit-less-7c8de164e423).
+This package doesn't include a polyfill of `requestAnimationFrame`, which is required for IE < 10. You should [include it](https://gist.github.com/paulirish/1579671) [yourself](https://hackernoon.com/polyfills-everything-you-ever-wanted-to-know-or-maybe-a-bit-less-7c8de164e423).
 
 ## Example
 
@@ -45,7 +45,7 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
 
     const MorphingPath = ({ definitions }) => {
 
-        const [definition, animateTo, animation] = useDefinition({ definitions })
+        const [definition, animateTo] = useDefinition({ definitions })
         const handleClick = () => {
             const { run, sequence } = animateTo('next')
             run(sequence)
@@ -74,98 +74,93 @@ This package has no external dependency like [SVGO](https://github.com/svg/svgo)
     import useDefinition, { timing } from '@cdoublev/use-definition`
 ```
 
-### `useDefinition`
-
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
 `useDefinition :: { definitions: [Definition], options?: Options } -> [Definition, Function, Reference]`
 
-#### Arguments
+### Arguments
 
-##### `definitions` (required)
+#### definitions (required)
 
 `definitions` should be assigned with a collection of `d`efinition attributes of multiple SVG `<path>`s.
 
-All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`, `z` – either using relative or absolute values. The only rule is that each `<path>` should not include a moving command (`m` or `M`) that is not the first command of the definition.
+All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`, `z` – either relative (lowercase) or absolute (uppercase). The only rule is that each `<path>` should not include a moving command (`m` or `M`) that is not the first command of the definition.
 
-##### `options` (optional)
+#### options (optional)
 
 | **Options** | **Description**                                               | **Default** |
-| ----------- | ------------------------------------------------------------- | ------- |
-| delay       | Delay (in ms) to wait before animating all points.            | -       |
-| duration    | Duration (in ms) to animate all points.                       | -       |
-| minDelay    | Random minimum delay (not processed if `delay` is set).       | `0`     |
-| maxDelay    | Random maximum delay (not processed if `delay` is set).       | `1000`  |
-| minDuration | Random minimum duration (not processed if `duration` is set). | `3000`  |
-| maxDuration | Random maximum duration (not processed if `duration` is set). | `5000`  |
-| precision   | Rounding precision.                                           | `2`     |
-| startIndex  | Index of the first definition to render.                      | `0`     |
+| ----------- | ------------------------------------------------------------- | ----------- |
+| delay       | Delay (in ms) to wait before animating all points.            | `undefined` |
+| duration    | Duration (in ms) to animate all points.                       | `undefined` |
+| minDelay    | Random minimum delay (not processed if `delay` is set).       | `0`         |
+| maxDelay    | Random maximum delay (not processed if `delay` is set).       | `1000`      |
+| minDuration | Random minimum duration (not processed if `duration` is set). | `3000`      |
+| maxDuration | Random maximum duration (not processed if `duration` is set). | `5000`      |
+| precision   | Rounding precision.                                           | `2`         |
+| startIndex  | Index of the first definition to render.                      | `0`         |
 
-When using `min` or `max` options, each point will receive random values between the given minimum and maximum of the corresponding option. Points at the same position will receive the same option values.
+When using a minimum and/or a maximum delay or duration, each point will be animated using a value between the given or the default value for the correspond option. The points with the same position will receive the same value.
 
-`delay` and/or `duration` can be used to opt-out from using random values.
+When using `delay` and/or `duration`, random values will not be used for the corresponding option.
 
-#### Return values
+### Return values
 
-##### `definition`
+#### definition
 
 The `String` returned by `useDefinition` can be named `definition` and should be used as the `d`efinition attribute value of the SVG `<path>` to render.
 
 It will be automatically updated while transitionning to another definition.
 
-##### `animateTo`
+#### animateTo
 
 The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
-`animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Frame -> TaskExecution }`
+`animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Task -> TaskExecution }`
 
 - `NextIndex => Number|String`
 - `TimingFunction => String`
 - `TimingFunction :: Number -> Number`
 - `TimingFunction :: (Number, [Group, Group]) -> Group`
 
-##### Expected arguments:
+`NextIndex` should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
 
-`animateTo` should receive `NextIndex` and a `TimingFunction`. It the latter is not provided, it will default to `'easeOutCubic'`.
+`TimingFunction` (default: `'easeOutCubic'`) should be either a timing function or an alias to an existing timing function (see the note below). It will be called at each frame, and will receive:
 
-`NextIndex` should be the index `Number` of the definition to transition to, or a convenient `'next'` alias of the next definition index.
+- a relative time value (between `0` and `1`)
+- a collection of two [groups of parameters](./src/definition/README.md#types-and-terminology): the first group belongs to the initial definition, and the second belongs to the corresponding group in the definition to transition to
 
-`TimingFunction` should be either an alias of an [available timing function](#timing), or a custom timing function called that will be called at each frame. It will receive a time value relative to the duration (between `0` and `1`), and a collection containing a [group of parameters](./src/definition/README.md#types-and-terminology) from the initial definition and its corresponding group from the definition to transition to. The behavior of this function should vary depending on its parameters length:
+The behavior of this `TimingFunction` should vary depending on its parameters length:
 
 - if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
 - otherwise, it should directly return the intermediate group of parameters
 
-For example, when time is `0.75`, a linear timing function that receive a group of parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }` should return:
+For example, when time is `0.75`, a linear timing function that receive a group of parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }` should return `0.75` if it uses time as its sole argument, otherwise `{ x: 75, y: 75 }`.
 
-- if it uses time as its sole argument: `0.75`
-- if it uses the second argument: `{ x: 75, y: 75 }`
+**Note on timing functions:**
 
-##### Return value:
+This package has a `timing` named export that is a collection of popular timing functions such as *ease*, *ease-in*, *ease-out*, etc... Medium to heavy motion design projects usually involve custom timing functions. This collection exists for demonstration purpose. Replacing CSS with JavaScript to transition between paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
 
-`animateTo` will return an object with the following properties:
+**Visualisations:** [Codepen](https://codepen.io/creative-wave/pen/vMrXJa).
 
-- `sequence`: a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) that can be used to chain consecutive(s) animation(s)
-- `run`: a function to run the sequence of animation(s)
+`animateTo` returns an object containing a `sequence`, which is a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) that can be used to chain consecutive(s) animation(s), and `run`, which is a function to run the sequence of animation(s).
 
-The latter is a dirty trick to automatically cancel the animation when the component has its definition animated while it is either updated or unmounted.
+The latter is a dirty trick to automatically cancel the animation before the component unmounts.
 
-**Using Folktale's Task interface**
-
-Executing a callback after an animation ends:
+**Executing a callback after an animation ends:**
 
 ```js
     const { run, sequence } = animateTo(2)
     run(sequence.map(() => console.log('transition to index 2: done')))
 ```
 
-Running a parrallel task:
+**Running a parrallel task:**
 
 ```js
     const { run, sequence } = animateTo(2)
     run(sequence.and(Task.of('transition to index 2: started')))
 ```
 
-Chaining animations:
+**Chaining animations:**
 
 ```js
     const { run, sequence } = animateTo(2)
@@ -173,14 +168,14 @@ Chaining animations:
     run(sequence
         .map(log)
         .chain(() => animateTo(3).sequence)
-        .map(log))
+        .map(log)
 ```
 
-##### `animation`
+#### animation
 
 The React `Reference` returned by `useDefinition` can be named `animation` and has the following type:
 
-`Reference => { current: { index: Number, isRunning?: Boolean, task?: TaskExecution }}`
+`Reference => { current: { index: Number, isRunning: Boolean, task?: TaskExecution }}`
 
 - `index` is the current index of the definition that is currently rendered
 - `isRunning` is `true` when an animation is running, otherwise `false`
@@ -188,17 +183,9 @@ The React `Reference` returned by `useDefinition` can be named `animation` and h
 
 **Note:** `index` will be immediately updated after executing `run(sequence)`.
 
-`isRunning` could be used to prevent starting a new animation if the previous one is not over, for example.
+`isRunning` can be used eg. to prevent starting a new animation if the previous one is not over.
 
-`task` could be used to cancel the animation, eg. if a *pause* event has been fired.
-
-### `timing`
-
-`timing` is a collection of popular timing functions such as *ease*, *ease-in*, *ease-out*, etc...
-
-**Visualisations:** [CodePen](https://codepen.io/creative-wave/pen/vMrXJa).
-
-Medium to heavy motion design projects usually involve custom timing functions. This collection is only meant for demonstration purpose. Replacing CSS with JavaScript to transition between paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
+`task` can be used eg. to cancel the animation if a *pause* event has been fired.
 
 ## TODO
 
