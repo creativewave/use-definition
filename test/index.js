@@ -581,6 +581,7 @@ describe('definition#normalize()', () => {
             assert.deepStrictEqual(actual[shape], shapes[name].normalized)
             assert.strictEqual(actual[shape][1].points.length, shapes[name].normalized[1].points.length)
         })
+        actual.slice(1).forEach(([, { points }]) => assert.strictEqual(points.length, actual[0][1].points.length))
     })
 })
 
