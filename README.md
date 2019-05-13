@@ -94,8 +94,8 @@ All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`,
 | duration    | Duration (in ms) to animate all points.                       | `undefined` |
 | minDelay    | Random minimum delay (not processed if `delay` is set).       | `0`         |
 | maxDelay    | Random maximum delay (not processed if `delay` is set).       | `1000`      |
-| minDuration | Random minimum duration (not processed if `duration` is set). | `3000`      |
-| maxDuration | Random maximum duration (not processed if `duration` is set). | `5000`      |
+| minDuration | Random minimum duration (not processed if `duration` is set). | `2000`      |
+| maxDuration | Random maximum duration (not processed if `duration` is set). | `4000`      |
 | precision   | Rounding precision.                                           | `2`         |
 | startIndex  | Index of the first definition to render.                      | `0`         |
 
