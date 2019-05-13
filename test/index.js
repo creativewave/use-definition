@@ -641,8 +641,8 @@ describe('definition#setAnimation()', () => {
         // (1) It should set required props with a value between a `min` and
         // `max` `Number`, based from arguments given to `setAnimations()`
         // (2) It should set the same props values to each `Point` with the same
-        // `[Point]`s values, and to the `Points` of the same `Group`,
-        // ie. consecutive start/end control and position parameters.
+        // end position parameters, and to the `Points` of the same `Group`, ie.
+        // consecutive start/end control and position parameters.
 
         // Expected => { [Prop]: Rule }
         // Rule => { min: Number, max: Number }
