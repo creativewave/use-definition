@@ -10,9 +10,9 @@ import { serializeDefinition } from './serialize'
 
 const defaultOptions = {
     maxDelay: 1000,
-    maxDuration: 5000,
+    maxDuration: 4000,
     minDelay: 0,
-    minDuration: 3000,
+    minDuration: 2000,
     precision: 2,
     startIndex: 0,
 }
