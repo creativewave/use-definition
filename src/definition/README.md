@@ -7,9 +7,7 @@
 
 **Why updating the current definition's index immediately after its animation starts, rather than waiting for its end?**
 
-This is easiest way to handle a sequence of chained animations that are using the current definition's index to select the next index of the definition to transition to. Otherwise, they would all be animated from the same initial definition that is set before the sequence run.
-
-Thus, the event callback that triggers the sequence should handle a new event when the previous animation is not over, eg.:
+This is the easiest way to handle chained animations. Otherwise, each of them would start animating from the same initial definition. Thus, the event callback that triggers the sequence should also handle events that happens before the previous animation is over, eg.:
 
 ```js
     if (animation.current.isRunning) return
