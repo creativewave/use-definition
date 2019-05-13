@@ -15,6 +15,7 @@ const defaultOptions = {
     minDuration: 2000,
     precision: 2,
     startIndex: 0,
+    timing: 'easeOutCubic',
 }
 
 /**
@@ -43,10 +44,12 @@ const defaultOptions = {
  */
 const useDefinition = ({ definitions, options: userOptions = {} }) => {
 
-    const { startIndex, ...options } = { ...defaultOptions, ...userOptions }
-    const defs = React.useMemo(() => setAnimations(normalize(parse(definitions)), options), [definitions, options])
+    const { startIndex, ...globalOptions } = { ...defaultOptions, ...userOptions }
+    const defs = React.useMemo(
+        () => setAnimations(normalize(parse(definitions)), globalOptions),
+        [definitions, globalOptions])
     const [definition, setDefinition] = React.useState(defs[startIndex])
-    const animation = React.useRef({ index: startIndex })
+    const animation = React.useRef({ index: startIndex, isRunning: false })
 
     /**
      * animateTo :: NextIndex -> TimingFunction -> { sequence: Task, run: Frame -> TaskExecution }
@@ -61,14 +64,15 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
      *
      * Memo: the scoped `definition` will be stale right after animation starts.
      */
-    const animateTo = (nextIndex, pointTimingFunction = 'easeOutCubic') => {
+    const animateTo = (next, stepOptions = {}) => {
 
-        const from = animation.current.isRunning ? definition : defs[animation.current.index]
-        const next = typeof nextIndex === 'string'
+        const nextIndex = typeof next === 'string'
             ? animation.current.index === defs.length - 1 ? 0 : animation.current.index + 1
-            : nextIndex
-        const to = defs[next]
-        const timingFunction = parseTimingFunction(pointTimingFunction)
+            : next
+        const options = { ...globalOptions, ...stepOptions }
+        const from = animation.current.isRunning ? definition : defs[animation.current.index]
+        const to = defs[nextIndex]
+        const timingFunction = parseTimingFunction(options.timing)
         const timeFunction = time => {
 
             let hasRun = true
@@ -76,7 +80,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
             setDefinition(from.map(({ points, type }, commandIndex) => ({
                 points: points.map((group, groupIndex) => {
 
-                    const { delay, duration } = to[commandIndex].points[groupIndex]
+                    const { delay = options.delay, duration = options.duration } = to[commandIndex].points[groupIndex]
                     const hasStarted = time > delay
                     const hasFrame = hasStarted && time < duration + delay
 
@@ -111,11 +115,11 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
             sequence: animate(timeFunction)
                 .and(Task.of().map(() => {
                     animation.current.isRunning = true
-                    animation.current.index = next
+                    animation.current.index = nextIndex
                 }))
                 .map(() => {
                     animation.current.isRunning = false
-                    return next
+                    return nextIndex
                 })
                 .orElse(logReject('[use-definition-hook]: error while running animation.')),
         }
