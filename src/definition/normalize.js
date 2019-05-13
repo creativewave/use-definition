@@ -31,21 +31,20 @@ export const normalizePoints = minPoints => definition => {
     while (drawCommand.points.length < minPoints) {
 
         const clones = minPoints - drawCommand.points.length
-        const delta = Math.round(drawCommand.points.length / clones) * Point.c.length || Point.c.length
-        const [startControlPoint, endControlPoint, ...rest] = drawCommand.points
+        const delta = Math.ceil(drawCommand.points.length / clones) * Point.c.length || Point.c.length
+        const [startControl, endControl, ...rest] = drawCommand.points
 
         drawCommand.points = rest.reduce(
-            (points, point, index) => {
-                const isPointToClone = index % delta === 0 && points.length + 1 < minPoints
-                if (isPointToClone) {
-                    const clonedPoint = { ...point, clone: true }
-                    points.push(point, clonedPoint, clonedPoint, clonedPoint)
-                    return points
+            (groups, group, index) => {
+                if (index % delta === 0 && ((groups.length + Point.c.length + 1) <= minPoints)) {
+                    const clone = { ...group, clone: true }
+                    groups.push(group, clone, clone, clone)
+                    return groups
                 }
-                points.push(point)
-                return points
+                groups.push(group)
+                return groups
             },
-            [startControlPoint, endControlPoint])
+            [startControl, endControl])
     }
 
     return [startCommand, drawCommand, endCommand]
