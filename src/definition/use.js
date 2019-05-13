@@ -32,13 +32,18 @@ const defaultOptions = {
  *   maxDuration?: Number,
  *   precision?: Number,
  *   startIndex?: Number,
+ *   timing?: TimingFunction,
  * }
- * Reference => { current: { index: Number, isRunning: Boolean, task: TaskExecution } }
+ * TimingFunction => String
+ * TimingFunction :: (Number -> Number)
+ * TimingFunction :: (Number -> [Group, Group] -> Number)
+ * Reference => { current: { index: Number, isRunning: Boolean, task?: TaskExecution } }
  *
  * Given a collection of `Definition`, it should return:
- * - a normalized `d`efinition
- * - a `Function` to animate a transition into a next `Definition` index
- * - the index of the `Definition` that is currently rendered
+ * - a normalized `Definition` at `startIndex`
+ * - a `Function` to animate to a normalized `Definition` at a given index
+ * - a reference object pointing to the current index, the current status of the
+ * animation, and a task to control its execution
  *
  * Memo: implementation is explained in ./README.md.
  */
@@ -52,12 +57,8 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
     const animation = React.useRef({ index: startIndex, isRunning: false })
 
     /**
-     * animateTo :: NextIndex -> TimingFunction -> { sequence: Task, run: Frame -> TaskExecution }
-     *
-     * NextIndex => Number|String
-     * TimingFunction => String
-     * TimingFunction :: (Number -> Number)
-     * TimingFunction :: (Number -> [Group, Group] -> Number)
+     * animateTo :: { next: Number|String, options?: Options }
+     *           -> { sequence: Task, run: Task -> TaskExecution }
      *
      * Memo: the task is returned then received back and run here, in order to
      * automatically cancel it when component unmounts.

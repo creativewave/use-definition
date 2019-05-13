@@ -88,20 +88,47 @@ All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`,
 
 #### options (optional)
 
-| **Options** | **Description**                                               | **Default** |
-| ----------- | ------------------------------------------------------------- | ----------- |
-| delay       | Delay (in ms) to wait before animating all points.            | `undefined` |
-| duration    | Duration (in ms) to animate all points.                       | `undefined` |
-| minDelay    | Random minimum delay (not processed if `delay` is set).       | `0`         |
-| maxDelay    | Random maximum delay (not processed if `delay` is set).       | `1000`      |
-| minDuration | Random minimum duration (not processed if `duration` is set). | `2000`      |
-| maxDuration | Random maximum duration (not processed if `duration` is set). | `4000`      |
-| precision   | Rounding precision.                                           | `2`         |
-| startIndex  | Index of the first definition to render.                      | `0`         |
+| **Options**   | **Description**                                               | **Default**    |
+| ------------- | ------------------------------------------------------------- | -------------- |
+| `delay`       | Delay (in ms) to wait before animating all points.            | `undefined`    |
+| `duration`    | Duration (in ms) to animate all points.                       | `undefined`    |
+| `minDelay`    | Random minimum delay (not processed if `delay` is set).       | `0`            |
+| `maxDelay`    | Random maximum delay (not processed if `delay` is set).       | `1000`         |
+| `minDuration` | Random minimum duration (not processed if `duration` is set). | `2000`         |
+| `maxDuration` | Random maximum duration (not processed if `duration` is set). | `4000`         |
+| `precision`   | Rounding precision.                                           | `2`            |
+| `startIndex`  | Index of the first definition to render.                      | `0`            |
+| `timing`      | Timing function used to animate the definition.               | `easeOutCubic` |
+
+**Note**: `delay`, `duration` and `timing` can also be defined per animation when calling [`animateTo`](#animateTo).
 
 When using a minimum and/or a maximum delay or duration, each point will be animated using a value between the given or the default value for the correspond option. The points with the same position will receive the same value.
 
 When using `delay` and/or `duration`, random values will not be used for the corresponding option.
+
+`timing` is a short word for timing function. It should be either a timing function or an alias to an available timing function (see the note below):
+
+- `TimingFunction => String`
+- `TimingFunction :: Number -> Number`
+- `TimingFunction :: (Number, [Group, Group]) -> Group`
+
+It will be called at each frame, and will receive:
+
+- a relative time value (between `0` and `1`)
+- a collection of two [groups of parameters](./src/definition/README.md#types-and-terminology): the first group belongs to the initial definition, and the second belongs to the corresponding group in the definition to transition to
+
+The behavior of this timing function should vary depending on its parameters length:
+
+- if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
+- otherwise, it should directly return the intermediate group of parameters
+
+For example, when time is `0.75`, a linear timing function that receive a group of parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }` should return `0.75` if it uses time as its sole argument, otherwise `{ x: 75, y: 75 }`.
+
+**Note on available timing functions:**
+
+This package has a `timing` named export that is a collection of popular timing functions such as *ease*, *ease-in*, *ease-out*, etc... Medium to heavy motion design projects usually involve custom timing functions. This collection exists for demonstration purpose. Replacing CSS with JavaScript to transition between paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
+
+**Visualisations:** [Codepen](https://codepen.io/creative-wave/pen/vMrXJa).
 
 ### Return values
 
@@ -115,32 +142,11 @@ It will be automatically updated while transitionning to another definition.
 
 The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
-`animateTo :: (NextIndex, TimingFunction?) -> { sequence: Frame, run: Task -> TaskExecution }`
+`animateTo :: (Number|String, Options?) -> { sequence: Frame, run: Task -> TaskExecution }`
 
-- `NextIndex => Number|String`
-- `TimingFunction => String`
-- `TimingFunction :: Number -> Number`
-- `TimingFunction :: (Number, [Group, Group]) -> Group`
+The first argument should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
 
-`NextIndex` should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
-
-`TimingFunction` (default: `'easeOutCubic'`) should be either a timing function or an alias to an existing timing function (see the note below). It will be called at each frame, and will receive:
-
-- a relative time value (between `0` and `1`)
-- a collection of two [groups of parameters](./src/definition/README.md#types-and-terminology): the first group belongs to the initial definition, and the second belongs to the corresponding group in the definition to transition to
-
-The behavior of this `TimingFunction` should vary depending on its parameters length:
-
-- if it uses time as its sole argument, it should return a value relative to the intermediate value (between `0` and `1`) that a parameter should have at the corresponding relative time
-- otherwise, it should directly return the intermediate group of parameters
-
-For example, when time is `0.75`, a linear timing function that receive a group of parameters going from `{ x: 0, y: 0 }` to `{ x: 100, y: 100 }` should return `0.75` if it uses time as its sole argument, otherwise `{ x: 75, y: 75 }`.
-
-**Note on timing functions:**
-
-This package has a `timing` named export that is a collection of popular timing functions such as *ease*, *ease-in*, *ease-out*, etc... Medium to heavy motion design projects usually involve custom timing functions. This collection exists for demonstration purpose. Replacing CSS with JavaScript to transition between paths using a linear or a cubic bezier function is non-sense (do it directly with CSS).
-
-**Visualisations:** [Codepen](https://codepen.io/creative-wave/pen/vMrXJa).
+The second argument can be used to override some of the global `options` defined when calling `useDefinition`.
 
 `animateTo` returns an object containing a `sequence`, which is a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) that can be used to chain consecutive(s) animation(s), and `run`, which is a function to run the sequence of animation(s).
 
