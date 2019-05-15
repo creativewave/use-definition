@@ -45,7 +45,7 @@ This package doesn't include a polyfill of `requestAnimationFrame`, which is req
 
     const MorphingPath = ({ definitions }) => {
 
-        const [definition, animateTo] = useDefinition({ definitions })
+        const [definition, animateTo] = useDefinition(definitions)
         const handleClick = () => {
             const { run, sequence } = animateTo('next')
             run(sequence)
@@ -76,13 +76,13 @@ This package doesn't include a polyfill of `requestAnimationFrame`, which is req
 
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`useDefinition :: { definitions: [Definition], options?: Options } -> [Definition, Function, Reference]`
+`useDefinition :: ([Definition], Options?) -> [Definition, Function, Reference]`
 
 ### Arguments
 
-#### definitions (required)
+#### [Definition] (required)
 
-`definitions` should be assigned with a collection of `d`efinition attributes of multiple SVG `<path>`s.
+`[Definition]` should be a collection of `d`efinition attributes of multiple SVG `<path>`s.
 
 All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`, `z` – either relative (lowercase) or absolute (uppercase). The only rule is that each `<path>` should not include a moving command (`m` or `M`) that is not the first command of the definition.
 
