@@ -19,8 +19,7 @@ const defaultOptions = {
 }
 
 /**
- * useDefinition :: { definitions: [Definition], options?: Options }
- *               -> [Definition, Function, Reference]
+ * useDefinition :: [Definition] -> Options -> [Definition, Function, Reference]
  *
  * Definition => String
  * Options => {
@@ -47,7 +46,7 @@ const defaultOptions = {
  *
  * Memo: implementation is explained in ./README.md.
  */
-const useDefinition = ({ definitions, options: userOptions = {} }) => {
+const useDefinition = (definitions, userOptions = {}) => {
 
     const { startIndex, ...globalOptions } = { ...defaultOptions, ...userOptions }
     const defs = React.useMemo(
@@ -57,8 +56,7 @@ const useDefinition = ({ definitions, options: userOptions = {} }) => {
     const animation = React.useRef({ index: startIndex, isRunning: false })
 
     /**
-     * animateTo :: { next: Number|String, options?: Options }
-     *           -> { sequence: Task, run: Task -> TaskExecution }
+     * animateTo :: Number|String -> Options -> { sequence: Task, run: Task -> TaskExecution }
      *
      * Memo: the task is returned then received back and run here, in order to
      * automatically cancel it when component unmounts.
