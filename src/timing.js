@@ -51,7 +51,7 @@ const bounce = t => {
 }
 
 // https://css-tricks.com/emulating-css-timing-functions-javascript/#bouncing-transitions
-const back = ({ end, start }) => time => {
+const back = ({ end = 0, start = 0 }) => time => {
     if (start === 0) {
         return Math.sin(Math.PI * time * end) / Math.sin(Math.PI * end)
     } else if (end === 0) {
