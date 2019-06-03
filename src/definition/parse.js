@@ -40,6 +40,7 @@ export const parseDefinition = definition => [...definition].reduce(
                 const [isNewParamChar, fixedChar] = [char].map(char => {
                     switch (char) {
                         case ' ':
+                        case ',':
                             return [true, '']
                         case '-':
                             return [true, '-']
