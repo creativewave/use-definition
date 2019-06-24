@@ -9,7 +9,7 @@ import round from '../round'
  * logReject :: String -> Error -> Task Error
  */
 export const logReject = message => error =>
-    rejected(console.error(message, error) || error) // eslint-disable-line no-console
+    rejected(console.error(message, error) || error)
 
 /**
  * transitionTo :: Time -> [From, To] -> (Time -> Number) -> Group
