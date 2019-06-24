@@ -60,8 +60,6 @@ const useDefinition = (definitions, userOptions = {}) => {
      *
      * Memo: the task is returned then received back and run here, in order to
      * automatically cancel it when component unmounts.
-     *
-     * Memo: the scoped `definition` will be stale right after animation starts.
      */
     const animateTo = (next, stepOptions = {}) => {
 
