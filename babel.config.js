@@ -3,26 +3,31 @@
  *
  * This is a set of conventions to configure Babel via `process.env` variables.
  *
- * `BABEL_ENV` should define the `modules` definition system that Babel should
- * eventually transform ES modules `import` and `export` statements to: `cjs` or
- * `es`. The latter shouldn't be conflated with `esmodules` for `targets` (more
- * below). When not defined, a bundler should do this by itself using `umd`.
+ * `BABEL_ENV` should define the `modules` system that should be used in files
+ * outputed by Babel: `cjs` or `es`.
+ * `cjs` means that Babel should transform all ES modules `import` and `export`
+ * statements to their CommonJS equivalents.
+ * `undefined` or `false` means that a bundler should transform them using the
+ * syntax of the module system defined in its own configuration.
+ * `es` is currently associated with `esmodules` for `targets` (more below).
  *
- * `NODE_ENV` should define the processing context. When its's `undefined`, it
- * means that it's a package that will be used by an application (more below).
- * When it's `test`, Babel should use `cjs` and transpile for the current Node
- * version. Other values might be `development` or `production`, optionally
- * prefixed with `server/` or `client/`. When prefixed with `client/`, it should
- * transpile for the corresponding `browsers` targets defined in `package.json`.
+ * `NODE_ENV` should define the processing context.
+ * Until ESModules are stable, `test` means that Babel should transpile files
+ * for the current NodeJS version before being processed by a testing framework.
+ * `undefined` means that they will be consumed by an application (more below).
+ * Other values might be `development` or `production`, eventually prefixed with
+ * `server/` or `client/`. When prefixed with `client/`, it should transpile for
+ * the corresponding `browsers` targets defined in `package.json`. When prefixed
+ * with `server/`, it should transpile for the NodeJS version that will run the
+ * application.
  *
- * When `targets` is `esmodules`, Babel transpiles for a set of browsers that
- * supports ES modules. Ideally, a package should use ES modules but shouldn't
- * be transpilled. The bundler would resolve its import statements by using its
- * output path defined in the `module` field in `package.json` (instead of the
- * `main` field corresponding to the `cjs` version), bundling it using the set
- * of targets defined by the application. But this can't be easily achieved yet,
- * because it means that all `node_modules` would need to be compiled or that
- * the author should include/exclude modules to transpile or not.
+ * When `targets` is `esmodules`, Babel transpiles for a set of browsers which
+ * are supporting ESModules. Ideally, a package shouldn't be transpilled when it
+ * is consumed by another package or in an application. Both should resolve its
+ * path using its `module` field in `package.json` (instead of the `main` field
+ * corresponding to the `cjs` version), and bundle it using their own targets.
+ * But this can't be easily achieved yet: all `node_modules` would need to be
+ * compiled or the author should include/exclude modules to transpile or not.
  *
  * Related:
  * - https://webpack.js.org/guides/author-libraries/#final-steps
