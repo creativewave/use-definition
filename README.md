@@ -46,10 +46,7 @@ This package doesn't include a polyfill of `requestAnimationFrame`, which is req
     const MorphingPath = ({ definitions }) => {
 
         const [definition, animateTo] = useDefinition(definitions)
-        const handleClick = () => {
-            const { run, sequence } = animateTo('next')
-            run(sequence)
-        }
+        const handleClick = () => animateTo('next')
 
         return (
             <a onClick={handleClick}>
@@ -142,39 +139,28 @@ It will be automatically updated while transitionning to another definition.
 
 The `Function` returned by `useDefinition` can be named `animateTo` and has the following signature:
 
-`animateTo :: (Number|String, Options?) -> { sequence: Task, run: Task -> TaskExecution }`
+`animateTo :: (Number|String, Options?) -> Future`
 
 The first argument should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
 
 The second argument can be used to override some of the global `options` defined when calling `useDefinition`.
 
-`animateTo` returns an object containing a `sequence`, which is a [Folktale's `Task`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.task._task._task.html) that can be used to chain consecutive(s) animation(s), and `run`, which is a function to run the sequence of animation(s).
+`animateTo` returns an object which is a [Folktale's `Future`](https://folktale.origamitower.com/api/v2.3.0/en/folktale.concurrency.future.html) that can be used to `.map()` a callback and `.chain()` animation(s).
 
-The latter is a dirty trick to automatically cancel the animation before the component unmounts.
-
-**Executing a callback after an animation ends:**
+**Executing a callback after the end of an animation:**
 
 ```js
-    const { run, sequence } = animateTo(2)
-    run(sequence.map(() => console.log('transition to index 2: done')))
-```
-
-**Running a parrallel task:**
-
-```js
-    const { run, sequence } = animateTo(2)
-    run(sequence.and(Task.of('transition to index 2: started')))
+    animateTo(2).map(() => console.log('transition to index 2: done'))
 ```
 
 **Chaining animations:**
 
 ```js
-    const { run, sequence } = animateTo(2)
-    const log = newIndex => console.log(`transition to ${newIndex}: done`)
-    run(sequence
-        .map(log)
-        .chain(() => animateTo(3).sequence)
-        .map(log)
+    const log = state => console.log(`${state} transition`)
+    animateTo(2)
+        .map(() => log('Start'))
+        .chain(() => animateTo(3))
+        .map(() => log('End'))
 ```
 
 #### animation
