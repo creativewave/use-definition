@@ -2,7 +2,6 @@
 import setAnimations, { animate, logReject, transitionTo } from './animate'
 
 import React from 'react'
-import Task from 'folktale/concurrency/task'
 import normalize from './normalize'
 import parse from './parse'
 import { parse as parseTimingFunction } from '../timing'
@@ -56,10 +55,7 @@ const useDefinition = (definitions, userOptions = {}) => {
     const animation = React.useRef({ index: startIndex, isRunning: false })
 
     /**
-     * animateTo :: Number|String -> Options -> { sequence: Task, run: Task -> TaskExecution }
-     *
-     * Memo: the task is returned then received back and run here, in order to
-     * automatically cancel it when component unmounts.
+     * animateTo :: Number|String -> Options -> Future
      */
     const animateTo = (next, stepOptions = {}) => {
 
@@ -104,22 +100,19 @@ const useDefinition = (definitions, userOptions = {}) => {
             return hasRun ? { hasRun: true } : { hasRun: false }
         }
 
-        return {
-            run(task) {
-                if (animation.current.isRunning) animation.current.task.cancel()
-                animation.current.task = task.run()
-            },
-            sequence: animate(timeFunction)
-                .and(Task.of().map(() => {
-                    animation.current.isRunning = true
-                    animation.current.index = nextIndex
-                }))
+        if (animation.current.isRunning) animation.current.task.cancel()
+        animation.current.index = nextIndex
+        animation.current.isRunning = true
+        animation.current.task
+            = animate(timeFunction)
                 .map(() => {
                     animation.current.isRunning = false
                     return nextIndex
                 })
-                .orElse(logReject('[use-definition-hook]: error while running animation.')),
-        }
+                .orElse(logReject('[use-definition-hook]: error while running animation.'))
+                .run()
+
+        return animation.current.task.future()
     }
 
     // Cancel animation before component unmounts
