@@ -18,7 +18,30 @@ const defaultOptions = {
 }
 
 /**
- * useDefinition :: [Definition] -> Options -> [Definition, Function, Reference]
+ * getNextIndex :: { length: Number } -> Number -> Number
+ */
+const getNextIndex = (collection, currentIndex) =>
+    currentIndex === collection.length - 1 ? 0 : currentIndex + 1
+
+/**
+ * reducer :: State -> Action -> State
+ *
+ * State => { currentIndex: Number, isAnimated: Boolean, nextIndex: Number }
+ * Action -> { type: String, payload: State }
+ */
+const reducer = (state, action) => {
+    switch (action.type) {
+        case 'END':
+            return { currentIndex: state.nextIndex, isAnimated: false }
+        case 'NEXT':
+            return { currentIndex: state.nextIndex, isAnimated: true, nextIndex: action.payload.nextIndex }
+        default:
+            throw Error(`Unexpected action of type \`${action.type}\``)
+    }
+}
+
+/**
+ * useDefinition :: [Definition] -> Options -> [Definition, Function, State]
  *
  * Definition => String
  * Options => {
@@ -35,13 +58,12 @@ const defaultOptions = {
  * TimingFunction => String
  * TimingFunction :: (Number -> Number)
  * TimingFunction :: (Number -> [Group, Group] -> Number)
- * Reference => { current: { index: Number, isRunning: Boolean, task?: TaskExecution } }
+ * State => { currentIndex: Number, isAnimated: Boolean }
  *
  * Given a collection of `Definition`, it should return:
  * - a normalized `Definition` at `startIndex`
  * - a `Function` to animate to a normalized `Definition` at a given index
- * - a reference object pointing to the current index, the current status of the
- * animation, and a task to control its execution
+ * - the current state of the animation
  *
  * Memo: implementation is explained in ./README.md.
  */
@@ -52,18 +74,17 @@ const useDefinition = (definitions, userOptions = {}) => {
         () => setAnimations(normalize(parse(definitions)), globalOptions),
         [definitions, globalOptions])
     const [definition, setDefinition] = React.useState(defs[startIndex])
-    const animation = React.useRef({ index: startIndex, isRunning: false })
+    const [state, dispatch] = React.useReducer(reducer, { currentIndex: startIndex, isAnimated: false })
+    const animation = React.useRef({ ...state, nextIndex: getNextIndex(defs, startIndex) })
 
     /**
      * animateTo :: Number|String -> Options -> Future
      */
     const animateTo = (next, stepOptions = {}) => {
 
-        const nextIndex = typeof next === 'string'
-            ? animation.current.index === defs.length - 1 ? 0 : animation.current.index + 1
-            : next
+        const nextIndex = typeof next === 'string' ? animation.current.nextIndex : next
         const options = { ...globalOptions, ...stepOptions }
-        const from = animation.current.isRunning ? definition : defs[animation.current.index]
+        const from = state.isAnimated ? definition : defs[animation.current.currentIndex]
         const to = defs[nextIndex]
         const timingFunction = parseTimingFunction(options.timing)
         const timeFunction = time => {
@@ -100,13 +121,17 @@ const useDefinition = (definitions, userOptions = {}) => {
             return hasRun ? { hasRun: true } : { hasRun: false }
         }
 
-        if (animation.current.isRunning) animation.current.task.cancel()
-        animation.current.index = nextIndex
-        animation.current.isRunning = true
+        if (animation.current.isAnimated) animation.current.task.cancel()
+        dispatch({ payload: { nextIndex }, type: 'NEXT' })
+
+        animation.current.currentIndex = nextIndex
+        animation.current.isAnimated = true
+        animation.current.nextIndex = getNextIndex(defs, nextIndex)
         animation.current.task
             = animate(timeFunction)
                 .map(() => {
-                    animation.current.isRunning = false
+                    dispatch({ type: 'END' })
+                    animation.current.isAnimated = false
                     return nextIndex
                 })
                 .orElse(logReject('[use-definition-hook]: error while running animation.'))
@@ -116,9 +141,9 @@ const useDefinition = (definitions, userOptions = {}) => {
     }
 
     // Cancel animation before component unmounts
-    React.useEffect(() => () => animation.current.isRunning && animation.current.task.cancel(), [])
+    React.useEffect(() => () => animation.current.isAnimated && animation.current.task.cancel(), [])
 
-    return [serializeDefinition(definition), animateTo, animation]
+    return [serializeDefinition(definition), animateTo, state]
 }
 
 export default useDefinition
