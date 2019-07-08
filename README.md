@@ -73,7 +73,7 @@ This package doesn't include a polyfill of `requestAnimationFrame`, which is req
 
 `useDefinition` is the default export of this package. It's a React hook which has the following signature:
 
-`useDefinition :: ([Definition], Options?) -> [Definition, Function, Reference]`
+`useDefinition :: ([Definition], Options?) -> [Definition, Function, State]`
 
 ### Arguments
 
@@ -133,7 +133,7 @@ This package has a `timing` named export that is a collection of popular timing 
 
 The `String` returned by `useDefinition` can be named `definition` and should be used as the `d`efinition attribute value of the SVG `<path>` to render.
 
-It will be automatically updated while transitionning to another definition.
+This component prop will be updated while transitionning to another definition.
 
 #### animateTo
 
@@ -163,21 +163,17 @@ The second argument can be used to override some of the global `options` defined
         .map(() => log('End'))
 ```
 
-#### animation
+#### state
 
-The React `Reference` returned by `useDefinition` can be named `animation` and has the following type:
+The `State` returned by `useDefinition` can be named `state` and has the following type:
 
-`Reference => { current: { index: Number, isRunning: Boolean, task?: TaskExecution }}`
+`State => { currentIndex: Number, isAnimated: Boolean, nextIndex: Number }}`
 
-- `index` is the current index of the definition that is currently rendered
-- `isRunning` is `true` when an animation is running, otherwise `false`
-- `task` is a reference to the current `TaskExecution` that is either pending or completed
+Those component props can be used eg. to prevent starting a new animation if the previous one is not over, or to set a CSS class name to an HTML/SVG element.
 
-**Note:** `index` will be immediately updated after executing `run(sequence)`.
-
-`isRunning` can be used eg. to prevent starting a new animation if the previous one is not over.
-
-`task` can be used eg. to cancel the animation if a *pause* event has been fired.
+`currentIndex` will be updated just before/after the first/last animation frame, to the `nextIndex` that is currently defined in state.
+`nextIndex` will be updated just before the first animation frame, to the index of the definition to transition to.
+`isAnimated` will be updated to `true` just before the first animation frame, and to `false` just after the last one.
 
 ## TODO
 

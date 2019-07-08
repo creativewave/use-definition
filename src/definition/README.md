@@ -5,17 +5,22 @@
 
 # Implementation of `useDefinition`
 
-**Why updating the current definition's index immediately after its animation starts, rather than waiting for its end?**
+**Why using both a reference and state to store the current index and the current status (is it running or not?) of the animation?**
+**Why mutating the index reference immediately after animation starts, instead of waiting for its end, like for the update of its corresponding state value?**
 
-This is the easiest way to handle chained animations. Otherwise, each of them would start animating from the same initial definition. Thus, the event callback that triggers the sequence should also handle events that happens before the previous animation is over, eg.:
+Both questions are relative to the scope and closure of two functions: `animateTo`, and the cleanup function returned in `useEffect()`.
+
+Using a reference of the current status of the animation is required to cancel an animation before the component unmounts. An unmount callback isn't meant to make a state update, eg. dispatching a `CANCEL` action to cancel a reference of the animation. React will not execute a reducer and executing `useState` will throw an Error.
+
+Using a reference of the current index is required for chained animations, eg.:
 
 ```js
-    if (animation.current.isRunning) return
-    const { run, sequence } = animateTo(1)
-    run(sequence.chain(() => animateTo(2).sequence))
+    animateTo('next').chain(() => animateTo('next'))
 ```
 
-As it would be more accurate to wait for the end of an animation before updating the current index, this behavior could change in a future version.
+The scope of `animateTo` closes over the values before the animation starts, even the second call. But this second animation needs access to the current definition, not the definition before the previous animation starts. And even if the current index state is updated before starting the next animation, `animateTo` will still not have access to this state, as it belongs to a different render frame.
+
+Both state values, the current index and the status of the animation, are meant to be used to define props, eg. a CSS class name.
 
 **Why using `useState` to *save* a definition then *write* it as a definition attribute of an SVG `<path>`, instead of using `useRef` and *writing* it directly with `setAttributeNS()`?**
 
