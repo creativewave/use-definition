@@ -68,7 +68,7 @@ Render Element 1 ------------------> Render Element 2 --------->
     > requestAnimationFrame(update)        > (failed) update
 ```
 
-The `update` fails without throwing an error: React cancels all `update`s that were scheduled but couldn't have been run before the component unmounts.
+When using `useLayoutEffect`, the `update` still fails but without throwing an error: React cancels all `update`s that were scheduled but couldn't have been run before the component unmounts.
 
 **Note (not well documented):** before being unmounted, a parent component triggers the cleanup then the effect function of its child components from bottom to top then its own cleanup and effect functions, while `useLayoutEffect` triggers the cleanup functions from all child components then its own, and finally all effects and then its own.
 
