@@ -99,7 +99,7 @@ All command types are supported – `m`, `l`, `h`, `v`, `s`, `c`, `q`, `t`, `a`,
 
 **Note**: `delay`, `duration` and `timing` can also be defined per animation when calling [`animateTo`](#animateTo).
 
-When using a minimum and/or a maximum delay or duration, each point will be animated using a value between the given or the default value for the correspond option. The points with the same position will receive the same value.
+When using a minimum and/or a maximum delay or duration, each point will be animated using a random value for the corresponding option. Points which have the same position will receive the same value.
 
 When using `delay` and/or `duration`, random values will not be used for the corresponding option.
 
