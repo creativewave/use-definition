@@ -1,6 +1,7 @@
 
 import setAnimations, { animate, logReject, transitionTo } from './animate'
 
+import Maybe from 'folktale/maybe'
 import React from 'react'
 import normalize from './normalize'
 import parse from './parse'
@@ -94,7 +95,8 @@ const useDefinition = (definitions, userOptions = {}) => {
             setDefinition(from.map(({ points, type }, commandIndex) => ({
                 points: points.map((group, groupIndex) => {
 
-                    const { delay = options.delay, duration = options.duration } = to[commandIndex].points[groupIndex]
+                    const delay = Maybe.fromNullable(options.delay).getOrElse(to[commandIndex].points[groupIndex].delay)
+                    const duration = Maybe.fromNullable(options.duration).getOrElse(to[commandIndex].points[groupIndex].duration)
                     const hasStarted = time > delay
                     const hasFrame = hasStarted && time < duration + delay
 
