@@ -139,7 +139,19 @@ const useDefinition = (definitions, userOptions = {}) => {
                 .orElse(logReject('[use-definition-hook]: error while running animation.'))
                 .run()
 
-        return animation.current.task.future()
+        const future = animation.current.task.future()
+
+        future.to = (index, options, callback) => future.chain(() => {
+            if (typeof options === 'function') {
+                return animateTo(index).map(callback)
+            }
+            if (typeof callback === 'function') {
+                return animateTo(index, options).map(callback)
+            }
+            return animateTo(index, options)
+        })
+
+        return future
     }
 
     // Cancel animation before component unmounts

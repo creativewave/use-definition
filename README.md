@@ -180,4 +180,5 @@ Those component props can be used eg. to prevent starting a new animation if the
 - Performances: measure performances of each processing task
 - Performances: use a transducer to parse, normalize, and configure each command/point of a path
 - Performances: consider rendering in a canvas
+- Feature: implement `pause()`, `resume()`, `restart()`, `stop()` interfaces
 - Feature: export definitions as static CSS keyframes
