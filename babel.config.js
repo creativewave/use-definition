@@ -7,23 +7,23 @@
  * outputed by Babel: `cjs` or `es`.
  * `cjs` means that Babel should transform all ES modules `import` and `export`
  * statements to their CommonJS equivalents.
- * `undefined` or `false` means that a bundler should transform them using the
- * syntax of the module system defined in its own configuration.
  * `es` is currently associated with `esmodules` for `targets` (more below).
+ * `undefined`, `false` or `'auto'` means that a bundler should transform them
+ * using the syntax of the module system defined in its own configuration.
  *
  * `NODE_ENV` should define the processing context.
- * Until ESModules are stable, `test` means that Babel should transpile files
- * for the current NodeJS version before being processed by a testing framework.
+ * Until ESModules are stable in NodeJS, `test` means that Babel should output
+ * files transpiled for the current NodeJS version, before being processed by a
+ * testing framework.
  * `undefined` means that they will be consumed by an application (more below).
  * Other values might be `development` or `production`, eventually prefixed with
- * `server/` or `client/`. When prefixed with `client/`, it should transpile for
- * the corresponding `browsers` targets defined in `package.json`. When prefixed
- * with `server/`, it should transpile for the NodeJS version that will run the
- * application.
+ * `server/` or `client/`. With `client/`, Babel should output files transpiled
+ * for the corresponding `browsers` targets defined in `package.json`, and with
+ * `server`, for the NodeJS version that will run the application.
  *
  * When `targets` is `esmodules`, Babel transpiles for a set of browsers which
- * are supporting ESModules. Ideally, a package shouldn't be transpilled when it
- * is consumed by another package or in an application. Both should resolve its
+ * are supporting ES Modules. Ideally, a package shouldn't be transpilled when
+ * it's consumed by another package or an application. Both should resolve its
  * path using its `module` field in `package.json` (instead of the `main` field
  * corresponding to the `cjs` version), and bundle it using their own targets.
  * But this can't be easily achieved yet: all `node_modules` would need to be
