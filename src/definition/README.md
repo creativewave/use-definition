@@ -5,22 +5,22 @@
 
 # Implementation of `useDefinition`
 
-**Why using both a reference and state to store the current index and the current status (is it running or not?) of the animation?**
-**Why mutating the index reference immediately after animation starts, instead of waiting for its end, like for the update of its corresponding state value?**
+**Why using state and references to store the current index and status (is it running or not?) of the animation?**
+**Why updating the reference of the current index immediately after animation starts, instead of waiting for its end like for its corresponding state value?**
 
-Both questions are relative to the scope and closure of two functions: `animateTo`, and the cleanup function returned in `useEffect()`.
+Both questions are related to the scope (closure) of two functions: `animateTo`, which is returned to the component, and the cleanup function, returned in `useEffect()`.
 
-Using a reference of the current status of the animation is required to cancel an animation before the component unmounts. An unmount callback isn't meant to make a state update, eg. dispatching a `CANCEL` action to cancel a reference of the animation. React will not execute a reducer and executing `useState` will throw an Error.
-
-Using a reference of the current index is required for chained animations, eg.:
+Using a reference for the current index is required to chain animations, eg.:
 
 ```js
     animateTo('next').chain(() => animateTo('next'))
 ```
 
-The scope of `animateTo` closes over the values before the animation starts, even the second call. But this second animation needs access to the current definition, not the definition before the previous animation starts. And even if the current index state is updated before starting the next animation, `animateTo` will still not have access to this state, as it belongs to a different render frame.
+The scope of `animateTo` closes over values (props, state, etc...) defined before the animation starts, as well as the wrapped `animateTo` which will be executed later. But this second execution needs to read the current definition, not the definition before the previous animation starts. And it would still not get access to the current definition by updating the state of the current index before starting the next animation, as this state would belong to a different render frame.
 
-Both state values, the current index and the status of the animation, are meant to be used to define props, eg. a CSS class name.
+Using a reference for the current status of the animation is required to cancel an animation before the component unmounts. A cleanup function isn't meant to make a state update when components unmounts (eg. dispatching `CANCEL`): React will not execute a reducer given to `useReducer`, and it will throw an error when using a setter from `useState`.
+
+Both are conveniently provided as state values in order to react to an update, eg. by defining a CSS classname such as `is-animating` or `style[``path-${current.index}``]`.
 
 **Why using `useState` to *save* a definition then *write* it as a definition attribute of an SVG `<path>`, instead of using `useRef` and *writing* it directly with `setAttributeNS()`?**
 
