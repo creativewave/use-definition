@@ -18,6 +18,34 @@ const defaultOptions = {
     timing: 'easeOutCubic',
 }
 
+const shallowEqual = (prev, current) => {
+    for (const prop in prev)
+        if (prev[prop] !== current[prop])
+            return false
+    return true
+}
+
+/**
+ * useGatherMemo :: [Object, ...String|Symbol] -> [a, Object]
+ */
+const useGatherMemo = (object, ...props) => {
+
+    const ref = React.useRef(object)
+    const rest = React.useRef({})
+
+    if (!shallowEqual(ref.current, object)) ref.current = object
+
+    return React.useMemo(
+        () => Object.keys(ref.current).reduce(
+            (gather, key) => {
+                if (props.includes(key)) return gather
+                gather[gather.length - 1][key] = ref.current[key]
+                return gather
+            },
+            props.map(prop => ref.current[prop]).concat(rest.current)),
+        [ref, rest, props])
+}
+
 /**
  * getNextIndex :: { length: Number } -> Number -> Number
  */
@@ -70,7 +98,7 @@ const reducer = (state, action) => {
  */
 const useDefinition = (definitions, userOptions = {}) => {
 
-    const { startIndex, ...globalOptions } = { ...defaultOptions, ...userOptions }
+    const [startIndex, globalOptions] = useGatherMemo({ ...defaultOptions, ...userOptions }, 'startIndex')
     const defs = React.useMemo(
         () => setAnimations(normalize(parse(definitions)), globalOptions),
         [definitions, globalOptions])
