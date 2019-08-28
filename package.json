@@ -35,26 +35,27 @@
   },
   "dependencies": {
     "folktale": "^2.3.2",
-    "lodash": "^4.17.14"
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.0",
-    "@babel/core": "^7.5.4",
-    "@babel/preset-env": "^7.5.4",
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.4.4",
+    "@babel/register": "^7.5.5",
+    "@cdoublev/eslint-config": "^0.1.0",
     "babel-loader": "^8.0.6",
-    "browserslist": "^4.6.4",
-    "eslint": "^6.0.1",
-    "eslint-plugin-compat": "^3.2.0",
-    "eslint-plugin-react": "^7.14.2",
-    "eslint-plugin-react-hooks": "^1.6.1",
-    "mocha": "^6.1.4",
+    "browserslist": "^4.6.6",
+    "eslint": "^6.2.2",
+    "eslint-plugin-compat": "^3.3.0",
+    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^1.7.0",
+    "mocha": "^6.2.0",
     "mocha-clean": "^1.0.0",
-    "mocha-junit-reporter": "^1.23.0",
-    "react": "^16.8.6",
-    "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.5"
+    "mocha-junit-reporter": "^1.23.1",
+    "react": "^16.9.0",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
   },
   "peerDependencies": {
     "react": "^16.7.0-alpha.0"
