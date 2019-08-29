@@ -27,15 +27,15 @@ export const transitionTo = (time, [from, to], timingFunction, precision) => ({
 })
 
 /**
- * animate :: Number -> Protocol -> Task Error Protocol
+ * animate :: (Number -> Protocol) -> Options -> Task Error Number
  *
  * Protocol => { hasRun: Boolean }
  *
  * `animate` abstracts running an animation, ie. calling the same function with
- * a time value as argument over and over until the animation is done, using a
- * Folktale `Task`, which is close to monad types such as `Promise` or `Stream`,
- * and also to coproduct functors such as `Either`, and which give control on
- * the execution of the animation.
+ * a time value as argument over and over, until the animation is done, by using
+ * a Folktale `Task`, which is close to monads such as `Promise` and `Stream`,
+ * and to coproduct functors such as `Either`, and which gives control on the
+ * execution of the animation.
  *
  * It also abstracts using `requestAnimationFrame` and `cancelAnimationFrame`,
  * and handling a time variable.
