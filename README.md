@@ -163,6 +163,14 @@ The second argument can be used to override some of the global `options` defined
         .map(() => log('End'))
 ```
 
+A convenient (but experimental) `.to()` interface can be used as an alias of `.chain(() => animateTo())`, ie.:
+
+```js
+    animateTo(2).to(3)
+```
+
+**Experimental:** in addition to `.to()`, `pause()` and `resume()` can be used to pause and resume an animation.
+
 #### state
 
 The `State` returned by `useDefinition` can be named `state` and has the following type:
