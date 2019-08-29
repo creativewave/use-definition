@@ -19,12 +19,20 @@ const defaultOptions = {
     timing: 'easeOutCubic',
 }
 
-
 /**
- * getNextIndex :: { length: Number } -> Number -> Number
+ * getIndex :: String|Number -> Number -> { length: Number } -> Number
  */
-const getNextIndex = (collection, currentIndex) =>
-    currentIndex === collection.length - 1 ? 0 : currentIndex + 1
+const getIndex = (flag, currentIndex, collection) => {
+    if (flag === 'prev') {
+        if (currentIndex === 0) return collection.length - 1
+        return currentIndex - 1
+    }
+    if (flag === 'next') {
+        if (currentIndex === collection.length - 1) return 0
+        return currentIndex + 1
+    }
+    return flag
+}
 
 /**
  * reducer :: State -> Action -> State
@@ -78,15 +86,16 @@ const useDefinition = (definitions, userOptions = {}) => {
         [definitions, globalOptions])
     const [definition, setDefinition] = React.useState(defs[startIndex])
     const [state, dispatch] = React.useReducer(reducer, { currentIndex: startIndex, isAnimated: false })
-    const animation = React.useRef({ ...state, nextIndex: getNextIndex(defs, startIndex) })
+    const animation = React.useRef(state)
+    const setTime = React.useCallback(time => animation.current.time = time, [animation])
 
     /**
      * animateTo :: Number|String -> Options -> Future
      */
     const animateTo = (next, stepOptions = {}) => {
 
-        const nextIndex = typeof next === 'string' ? animation.current.nextIndex : next
         const options = { ...globalOptions, ...stepOptions }
+        const nextIndex = getIndex(next, animation.current.currentIndex, defs)
         const from = state.isAnimated ? definition : defs[animation.current.currentIndex]
         const to = defs[nextIndex]
         const timingFunction = parseTimingFunction(options.timing)
@@ -130,7 +139,6 @@ const useDefinition = (definitions, userOptions = {}) => {
 
         animation.current.currentIndex = nextIndex
         animation.current.isAnimated = true
-        animation.current.nextIndex = getNextIndex(defs, nextIndex)
         animation.current.task
             = animate(timeFunction)
                 .map(() => {
