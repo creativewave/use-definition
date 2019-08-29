@@ -179,9 +179,9 @@ The `State` returned by `useDefinition` can be named `state` and has the followi
 
 Those component props can be used eg. to prevent starting a new animation if the previous one is not over, or to set a CSS class name to an HTML/SVG element.
 
-`currentIndex` will be updated just before/after the first/last animation frame, to the `nextIndex` that is currently defined in state.
-`nextIndex` will be updated just before the first animation frame, to the index of the definition to transition to.
-`isAnimated` will be updated to `true` just before the first animation frame, and to `false` just after the last one.
+`currentIndex` will be updated after the last animation frame, with the `nextIndex` defined in state.
+`nextIndex` will be updated before the first animation frame, to the index of the definition to transition to.
+`isAnimated` will be updated to `true` before the first animation frame, and to `false` after the last one.
 
 ## TODO
 
