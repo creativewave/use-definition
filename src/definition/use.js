@@ -7,6 +7,7 @@ import normalize from './normalize'
 import parse from './parse'
 import { parse as parseTimingFunction } from '../timing'
 import { serializeDefinition } from './serialize'
+import { useGatherMemo } from '@cdoublev/react-utils'
 
 const defaultOptions = {
     maxDelay: 1000,
@@ -18,33 +19,6 @@ const defaultOptions = {
     timing: 'easeOutCubic',
 }
 
-const shallowEqual = (prev, current) => {
-    for (const prop in prev)
-        if (prev[prop] !== current[prop])
-            return false
-    return true
-}
-
-/**
- * useGatherMemo :: [Object, ...String|Symbol] -> [a, Object]
- */
-const useGatherMemo = (object, ...props) => {
-
-    const ref = React.useRef(object)
-    const rest = React.useRef({})
-
-    if (!shallowEqual(ref.current, object)) ref.current = object
-
-    return React.useMemo(
-        () => Object.keys(ref.current).reduce(
-            (gather, key) => {
-                if (props.includes(key)) return gather
-                gather[gather.length - 1][key] = ref.current[key]
-                return gather
-            },
-            props.map(prop => ref.current[prop]).concat(rest.current)),
-        [ref, rest, props])
-}
 
 /**
  * getNextIndex :: { length: Number } -> Number -> Number

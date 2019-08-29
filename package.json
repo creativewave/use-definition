@@ -34,6 +34,7 @@
     "test:watch": "mocha -w -b -R min"
   },
   "dependencies": {
+    "@cdoublev/react-utils": "^0.1.1",
     "folktale": "^2.3.2",
     "lodash": "^4.17.15"
   },
