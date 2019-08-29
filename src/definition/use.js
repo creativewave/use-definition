@@ -94,7 +94,7 @@ const useDefinition = (definitions, userOptions = {}) => {
      */
     const animateTo = (next, stepOptions = {}) => {
 
-        const options = { ...globalOptions, ...stepOptions }
+        const options = { ...defaultOptions, ...stepOptions }
         const nextIndex = getIndex(next, animation.current.currentIndex, defs)
         const from = state.isAnimated ? definition : defs[animation.current.currentIndex]
         const to = defs[nextIndex]
