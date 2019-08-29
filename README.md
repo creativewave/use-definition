@@ -141,7 +141,7 @@ The `Function` returned by `useDefinition` can be named `animateTo` and has the 
 
 `animateTo :: (Number|String, Options?) -> Future`
 
-The first argument should be the index of the definition to transition to, or a convenient `'next'` alias that will be resolved to the next index after the current index, starting over at index `0` when required.
+The first argument should be the index of the definition to transition to, or a convenient `'next'` or `'prev'` alias that will be resolved to the next or prev index after the current index, starting over at the first or last when required.
 
 The second argument can be used to override some of the global `options` defined when calling `useDefinition`.
 
