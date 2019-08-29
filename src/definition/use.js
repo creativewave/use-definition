@@ -45,7 +45,11 @@ const reducer = (state, action) => {
         case 'END':
             return { currentIndex: state.nextIndex, isAnimated: false }
         case 'NEXT':
-            return { currentIndex: state.nextIndex, isAnimated: true, nextIndex: action.payload.nextIndex }
+            return {
+                currentIndex: state.nextIndex || state.currentIndex,
+                isAnimated: true,
+                nextIndex: action.payload.nextIndex,
+            }
         default:
             throw Error(`Unexpected action of type \`${action.type}\``)
     }
