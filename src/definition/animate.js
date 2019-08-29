@@ -42,9 +42,10 @@ export const transitionTo = (time, [from, to], timingFunction, precision) => ({
  *
  * Note: `Protocol` can be used as a free data transport between sequences.
  */
-export const animate = timeFunction => task(resolver => {
+export const animate = (timeFunction, { offset = 0, onCancel = () => {} }) => task(resolver => {
 
     let startTime = 0
+    let time
     let timerId
 
     const run = timestamp => {
@@ -52,7 +53,7 @@ export const animate = timeFunction => task(resolver => {
         if (startTime === 0) {
             startTime = timestamp
         }
-        const time = timestamp - startTime
+        time = timestamp - startTime + offset
 
         let animation
 
@@ -70,7 +71,10 @@ export const animate = timeFunction => task(resolver => {
         timerId = requestAnimationFrame(run)
     }
     timerId = requestAnimationFrame(run)
-    resolver.onCancelled(() => cancelAnimationFrame(timerId))
+    resolver.onCancelled(() => {
+        onCancel(time)
+        cancelAnimationFrame(timerId)
+    })
 })
 
 /**

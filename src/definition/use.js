@@ -42,6 +42,8 @@ const getIndex = (flag, currentIndex, collection) => {
  */
 const reducer = (state, action) => {
     switch (action.type) {
+        case 'TOGGLE':
+            return { ...state, isAnimated: !state.isAnimated }
         case 'END':
             return { currentIndex: state.nextIndex, isAnimated: false }
         case 'NEXT':
@@ -135,7 +137,54 @@ const useDefinition = (definitions, userOptions = {}) => {
                 type,
             })))
 
-            return hasRun ? { hasRun: true } : { hasRun: false }
+            return { hasRun, time }
+        }
+
+        /**
+         * Experimental
+         *
+         * Related:
+         * - https://github.com/origamitower/folktale/issues/224
+         * - https://github.com/tc39/proposal-cancelable-promises
+         * - https://developer.mozilla.org/en-US/docs/Web/API/Animation
+         */
+        const extendFuture = future => {
+
+            future.to = (index, options, callback) => extendFuture(
+                future.chain(() => {
+                    if (typeof options === 'function') {
+                        return animateTo(index).map(callback)
+                    }
+                    if (typeof callback === 'function') {
+                        return animateTo(index, options).map(callback)
+                    }
+                    return animateTo(index, options)
+                }))
+
+            future.pause = () => {
+
+                animation.current.task.cancel()
+                animation.current.isAnimated = false
+                dispatch({ type: 'TOGGLE' })
+
+                return future
+            }
+
+            future.resume = () => {
+                const offset = animation.current.time
+                animation.current.time = 0
+                return extendFuture(animation.current.task =
+                    animate(timeFunction, { offset, onCancel: setTime })
+                        .map(() => {
+                            dispatch({ type: 'END' })
+                            animation.current.isAnimated = false
+                            return nextIndex
+                        })
+                        .orElse(logReject('[use-definition-hook]: error while running animation.'))
+                        .run())
+            }
+
+            return future
         }
 
         if (animation.current.isAnimated) animation.current.task.cancel()
@@ -143,8 +192,8 @@ const useDefinition = (definitions, userOptions = {}) => {
 
         animation.current.currentIndex = nextIndex
         animation.current.isAnimated = true
-        animation.current.task
-            = animate(timeFunction)
+        animation.current.task =
+            animate(timeFunction, { onCancel: setTime })
                 .map(() => {
                     dispatch({ type: 'END' })
                     animation.current.isAnimated = false
@@ -153,19 +202,7 @@ const useDefinition = (definitions, userOptions = {}) => {
                 .orElse(logReject('[use-definition-hook]: error while running animation.'))
                 .run()
 
-        const future = animation.current.task.future()
-
-        future.to = (index, options, callback) => future.chain(() => {
-            if (typeof options === 'function') {
-                return animateTo(index).map(callback)
-            }
-            if (typeof callback === 'function') {
-                return animateTo(index, options).map(callback)
-            }
-            return animateTo(index, options)
-        })
-
-        return future
+        return extendFuture(animation.current.task.future())
     }
 
     // Cancel animation before component unmounts
