@@ -100,7 +100,7 @@ const useDefinition = (definitions, userOptions = {}) => {
 
         const options = { ...defaultOptions, ...stepOptions }
         const nextIndex = getIndex(next, animation.current.currentIndex, defs)
-        const from = state.isAnimated ? definition : defs[animation.current.currentIndex]
+        const from = animation.current.isAnimated ? definition : defs[animation.current.currentIndex]
         const to = defs[nextIndex]
         const timingFunction = parseTimingFunction(options.timing)
         const timeFunction = time => {
