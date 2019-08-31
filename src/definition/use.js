@@ -1,6 +1,5 @@
 
 import setAnimations, { animate, logReject, transitionTo } from './animate'
-
 import Maybe from 'folktale/maybe'
 import React from 'react'
 import normalize from './normalize'
@@ -98,9 +97,9 @@ const useDefinition = (definitions, userOptions = {}) => {
     /**
      * animateTo :: Number|String -> Options -> Future
      */
-    const animateTo = (next, stepOptions = {}) => {
+    const animateTo = (next, stepOptions) => {
 
-        const options = { ...defaultOptions, ...stepOptions }
+        const options = stepOptions ? { ...defaultOptions, ...stepOptions } : globalOptions
         const nextIndex = getIndex(next, animation.current.currentIndex, defs)
         const from = animation.current.isAnimated ? definition : defs[animation.current.currentIndex]
         const to = defs[nextIndex]
