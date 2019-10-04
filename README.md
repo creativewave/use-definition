@@ -1,3 +1,49 @@
+
+**DEPRECATED:** this package has been splitted in two sub-packages and is now deprecated.
+
+**How to replace it:**
+
+Featured [example](#example):
+
+```js
+    import toCubic from '@cdoublev/to-cubic'
+    import useAnimate from '@cdoublev/react-utils'
+    import React from 'react'
+
+    // "blob" shapes
+    const definitions = toCubic([
+        'M84 19c8 25-27 7-27 51s39 29 23 54S32 138 22 128S3 89 3 68s7-37 18-46S75-6 84 19z',
+        'M82 22c11 25-33 36-11 71s-3 57-33 46S5 74 13 40 71-2 82 22z',
+    ])
+
+    const MorphingPath = () => {
+
+        const path = React.useRef()
+        const animate = useAnimate(path)
+        const handleClick = React.useCallback(
+            () => animate(
+                [ d: `path('${definitions[0]}')`, d: `path('${definitions[1]}')` ],
+                2000),
+            [animate])
+
+        return (
+            <a onClick={handleClick}>
+                <svg viewBox='0 0 100 150'>
+                    <path ref={path} fill='#0e1539' />
+                </svg>
+            </a>
+        )
+    }
+
+    ReactDOM.render(<MorphingPath />, document.getElementById('app'))
+```
+
+Learn more:
+- [to-cubic](https://github.com/creativewave/to-cubic)
+- [useAnimate](https://github.com/creativewave/react-utils#useAnimate)
+- [useAnimateCustom](https://github.com/creativewave/react-utils#useAnimateCustom)
+- [depreciation notice](./DEPRECIATION.md)
+
 [![CircleCI](https://circleci.com/gh/creativewave/use-definition.svg?style=svg)](https://circleci.com/gh/creativewave/use-definition)
 
 # use-definition
